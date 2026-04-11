@@ -4,6 +4,7 @@ import { supabase } from './lib/supabaseClient';
 import { CartProvider } from './context/CartContext';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
+import FeaturesSection from './components/FeaturesSection';
 import ProductShowcase from './components/ProductShowcase';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
@@ -20,6 +21,7 @@ function MainSite() {
       <CartDrawer />
       <main>
         <HeroSection />
+        <FeaturesSection />
         <ProductShowcase />
         <ContactForm />
       </main>

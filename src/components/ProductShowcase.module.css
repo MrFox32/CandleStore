@@ -105,7 +105,7 @@
   border-color: var(--primary-color);
 }
 
-@media (max-width: 650px) {
+@media (max-width: 666px) {
   .grid {
     grid-template-columns: 1fr;
     gap: 30px;
