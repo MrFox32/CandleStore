@@ -85,7 +85,8 @@ img {
 
 .btn:hover {
   background-color: var(--primary-hover);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(142, 112, 96, 0.2);
 }
 
 .btn-outline {

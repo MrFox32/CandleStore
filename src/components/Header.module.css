@@ -40,10 +40,27 @@
   transition: var(--transition);
   text-transform: uppercase;
   letter-spacing: 1px;
+  position: relative;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
 }
 
 .navLink:hover {
   color: var(--primary-color);
+}
+
+.navLink:hover::after {
+  width: 100%;
 }
 
 .cartBtn {
@@ -56,11 +73,12 @@
   align-items: center;
   padding: 4px;
   border-radius: var(--radius-sm);
-  transition: color 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cartBtn:hover {
   color: var(--primary-color);
+  transform: translateY(-2px) scale(1.05); /* slightly bigger scale for smaller button */
 }
 
 .badge {
