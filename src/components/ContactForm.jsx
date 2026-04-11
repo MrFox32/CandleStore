@@ -35,7 +35,7 @@ export default function ContactForm() {
             <div className={styles.successMessage}>
               <h3>Дякуємо!</h3>
               <p>Ваша заявка прийнята. Ми скоро вам зателефонуємо.</p>
-              <button className="btn btn-outline" onClick={() => setSubmitted(false)} style={{marginTop: '20px'}}>Нова заявка</button>
+              <button className="btn" onClick={() => setSubmitted(false)} style={{marginTop: '20px'}}>Нова заявка</button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className={styles.form}>
