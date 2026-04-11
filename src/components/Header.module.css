@@ -80,6 +80,40 @@
   animation: popIn 0.2s ease;
 }
 
+@media (max-width: 768px) {
+  .nav {
+    gap: 12px;
+  }
+  
+  .navLink {
+    display: inline-block;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+  }
+
+  .logoLink svg {
+    width: 140px;
+  }
+}
+
+@media (max-width: 400px) {
+  .nav {
+    gap: 8px;
+  }
+  
+  .navLink {
+    font-size: 0.7rem;
+  }
+
+  .logoLink svg {
+    width: 110px; /* Агресивне зменшення для вузьких екранів */
+  }
+
+  .cartBtn {
+    padding: 2px;
+  }
+}
+
 @keyframes popIn {
   0% { transform: scale(0); }
   70% { transform: scale(1.2); }

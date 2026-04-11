@@ -104,3 +104,26 @@
   color: var(--primary-color);
   border-color: var(--primary-color);
 }
+
+@media (max-width: 650px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .card {
+    max-width: 75%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+}

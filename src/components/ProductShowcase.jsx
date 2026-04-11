@@ -11,22 +11,18 @@ export default function ProductShowcase() {
 
   useEffect(() => {
     async function fetchProducts() {
-      // Пряма перевірка на плейсхолдер, щоб не спамити помилками
-      if (import.meta.env.VITE_SUPABASE_URL.includes('your-project-url')) {
-        setLoading(false);
-        return;
-      }
-
       setLoading(true);
       const { data, error } = await supabase
         .from('products')
-        .select('*')
-        .eq('is_active', true);
+        .select('*');
 
       if (error) {
         console.error('Error fetching products:', error);
       } else if (data && data.length > 0) {
         setProducts(data);
+      } else if (data && data.length === 0) {
+        // Якщо база порожня, можна залишити статику або занулити
+        // setProducts([]); 
       }
       setLoading(false);
     }
