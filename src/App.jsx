@@ -44,7 +44,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter basename="/CandleStore">
+    <BrowserRouter>
       <CartProvider>
         <Routes>
           <Route path="/" element={<MainSite />} />
