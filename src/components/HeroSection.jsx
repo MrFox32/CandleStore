@@ -1,5 +1,5 @@
 import styles from './HeroSection.module.css';
-import niceUIImg from '../assets/NiceUI.png';
+import heroImg from '../assets/CandelsHeroSection.png';
 
 export default function HeroSection() {
   return (
@@ -13,7 +13,7 @@ export default function HeroSection() {
           <a href="#showcase" className={`btn ${styles.cta}`}>ОБРАТИ ПОДАРУНОК</a>
         </div>
         <div className={styles.imageWrapper}>
-          <img src={niceUIImg} alt="Естетика свічок" className={styles.image} />
+          <img src={heroImg} alt="Естетика свічок" className={styles.image} />
           <div className={styles.imageBackdrop}></div>
         </div>
       </div>

@@ -1,15 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import styles from './CartDrawer.module.css';
 
 export default function CartDrawer() {
   const { items, removeItem, updateQty, clearCart, totalPrice, isOpen, setIsOpen } = useCart();
 
+  const navigate = useNavigate();
+
   const handleOrder = () => {
     setIsOpen(false);
-    setTimeout(() => {
-      const section = document.getElementById('contact');
-      if (section) section.scrollIntoView({ behavior: 'smooth' });
-    }, 300);
+    navigate('/checkout');
   };
 
   return (

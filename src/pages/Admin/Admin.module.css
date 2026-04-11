@@ -1,0 +1,308 @@
+.adminContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: var(--bg-color);
+}
+
+.loginForm {
+  background: white;
+  padding: 40px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.loginForm h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.loginForm input {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+/* Dashboard Layout */
+.dashboardLayout {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.navHeader {
+  background: white;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.tabs {
+  display: flex;
+  gap: 20px;
+}
+
+.tabs button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px 4px;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.tabs button:hover {
+  color: var(--text-color);
+}
+
+.activeTab {
+  color: var(--accent-color) !important;
+}
+
+.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--accent-color);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 450px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.formContainer, .listContainer {
+  background: white;
+  padding: 30px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.formContainer h2, .listContainer h2 {
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+}
+
+.addForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.addForm input, .addForm textarea {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  box-sizing: border-box; /* Важливо для правильних розмірів */
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+.row input {
+  flex: 1;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.fileInput {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+/* Product List Display */
+.productList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.productItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
+}
+
+.productItem:hover {
+  background: #fafafa;
+}
+
+.miniImg {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.itemInfo {
+  flex: 1;
+}
+
+.itemInfo h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.itemInfo span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: #ff4d4d;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+}
+
+/* Orders Styles */
+.ordersContainer h2 {
+  margin-bottom: 30px;
+}
+
+.orderList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.orderCard {
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+.orderHeader {
+  background: #fcfcfc;
+  padding: 20px 30px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderHeader h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.orderDate {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.orderStatuses {
+  display: flex;
+  gap: 10px;
+}
+
+.statusSelect, .paymentSelect {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.statusSelect {
+  background-color: #fff9e6;
+  color: #856404;
+}
+
+.paymentSelect {
+  background-color: #e6f3ff;
+  color: #004085;
+}
+
+.orderContent {
+  padding: 30px;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 40px;
+}
+
+.customerInfo p {
+  margin-bottom: 10px;
+}
+
+.orderItems h4 {
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.orderItemRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #fafafa;
+  font-size: 0.95rem;
+}
+
+.orderTotal {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 2px solid #fcfcfc;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 1000px) {
+  .grid, .orderContent {
+    grid-template-columns: 1fr;
+  }
+}
