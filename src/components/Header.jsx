@@ -20,11 +20,11 @@ function LogoMark() {
       <text
         x="32"
         y="25"
-        fontFamily="'Playfair Display', Georgia, serif"
-        fontSize="20"
-        fontWeight="500"
+        fontFamily="'Montserrat', sans-serif"
+        fontSize="18"
+        fontWeight="600"
         fill="#2A2A2A"
-        letterSpacing="0.3"
+        letterSpacing="0.2"
       >
         CandleStore.
       </text>

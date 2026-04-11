@@ -29,6 +29,9 @@
   overflow: hidden;
   border: 1px solid var(--border-color);
   transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .card:hover {
@@ -56,6 +59,9 @@
 
 .cardInfo {
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .productName {
@@ -74,6 +80,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid rgba(142, 112, 96, 0.1);
 }
 
 .price {
@@ -83,26 +92,25 @@
 }
 
 .buyBtn {
-  /* Reset browser button defaults */
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--text-main);
-  padding: 0 0 2px 0;
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  padding: 8px 16px;
   margin: 0;
   cursor: pointer;
-  font-family: var(--font-body);
-
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
-  color: var(--text-main);
-  transition: var(--transition);
+  color: var(--primary-color);
+  transition: all 0.2s ease;
   letter-spacing: 0.5px;
+  border-radius: var(--radius-sm);
 }
 
 .buyBtn:hover {
-  color: var(--primary-color);
-  border-color: var(--primary-color);
+  background-color: var(--primary-color);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 666px) {

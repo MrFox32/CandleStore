@@ -5,6 +5,29 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.sectionTitle {
+  font-size: 2.2rem;
+  color: var(--text-main);
+  position: relative;
+  display: inline-block;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 2px;
+  background-color: var(--primary-color);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -41,7 +64,7 @@
 
 .title {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   margin-bottom: 12px;
   color: var(--text-main);
 }

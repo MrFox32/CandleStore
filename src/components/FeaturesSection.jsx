@@ -31,7 +31,7 @@ const features = [
     )
   },
   {
-    title: 'Естетика та Подарунок',
+    title: 'Готовий подарунок',
     description: 'Ми дбаємо про крафтову упаковку, щоб ваша покупка була готовим подарунком для себе чи близьких.',
     icon: (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -47,6 +47,9 @@ export default function FeaturesSection() {
   return (
     <section className={styles.featuresSection}>
       <div className="container">
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Чому обирають CandleStore?</h2>
+        </div>
         <div className={styles.grid}>
           {features.map((feature, index) => (
             <div key={index} className={styles.card}>
