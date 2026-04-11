@@ -45,7 +45,7 @@ export default function CartDrawer() {
             <ul className={styles.itemList}>
               {items.map((item) => (
                 <li key={item.id} className={styles.item}>
-                  <img src={item.image} alt={item.name} className={styles.itemImg} />
+                  <img src={item.image || item.image_url} alt={item.name} className={styles.itemImg} />
                   <div className={styles.itemInfo}>
                     <span className={styles.itemName}>{item.name}</span>
                     <span className={styles.itemPrice}>{item.price} ₴</span>
