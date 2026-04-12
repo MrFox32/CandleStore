@@ -105,6 +105,8 @@ export default function AdminDashboard() {
       price: parseFloat(formData.price)
     };
 
+    console.log("Відправка даних у Supabase:", productPayload);
+
     let error;
     if (editingProductId) {
       const { error: updateError } = await supabase.from('products').update(productPayload).eq('id', editingProductId);
