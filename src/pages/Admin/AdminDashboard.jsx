@@ -227,8 +227,11 @@ export default function AdminDashboard() {
       return;
     }
 
-    // 3. Update request status
-    await supabase.from('contact_requests').update({ status: 'Створено замовлення' }).eq('id', currentRequest.id);
+    // 3. Update request status and link order
+    await supabase.from('contact_requests').update({ 
+      status: 'Створено замовлення',
+      order_id: order.id
+    }).eq('id', currentRequest.id);
     
     setIsOrderModalOpen(false);
     setOrderProcessLoading(false);
@@ -432,17 +435,21 @@ export default function AdminDashboard() {
                         <td>{r.contact_method}</td>
                         <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.message}</td>
                         <td>
-                          <select 
-                            value={r.status} 
-                            onChange={(e) => updateRequestStatus(r.id, e.target.value)}
-                            disabled={r.status === 'Створено замовлення'}
-                          >
-                            <option value="Новий">Новий</option>
-                            <option value="В обробці">В обробці</option>
-                            <option value="Опрацьовано">Опрацьовано</option>
-                            <option value="Створено замовлення" disabled>Створено замовлення</option>
-                            <option value="Скасовано">Скасовано</option>
-                          </select>
+                          {r.status === 'Створено замовлення' && r.order_id ? (
+                            <span className={styles.orderIdBadge}>#{r.order_id.slice(0, 8)}</span>
+                          ) : (
+                            <select 
+                              value={r.status} 
+                              onChange={(e) => updateRequestStatus(r.id, e.target.value)}
+                              disabled={r.status === 'Створено замовлення'}
+                            >
+                              <option value="Новий">Новий</option>
+                              <option value="В обробці">В обробці</option>
+                              <option value="Опрацьовано">Опрацьовано</option>
+                              <option value="Створено замовлення" disabled>Створено замовлення</option>
+                              <option value="Скасовано">Скасовано</option>
+                            </select>
+                          )}
                         </td>
                         <td>
                           {r.status !== 'Створено замовлення' && (

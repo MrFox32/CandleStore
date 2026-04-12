@@ -413,3 +413,14 @@
   font-size: 1rem;
 }
 
+.orderIdBadge {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+
