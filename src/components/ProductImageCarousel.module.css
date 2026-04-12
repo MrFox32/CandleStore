@@ -1,0 +1,82 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%; /* In ProductShowcase.module.css, .imageWrapper controls the aspect-ratio. We just fill it. */
+  overflow: hidden;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  transform: scale(1);
+}
+
+.imageActive {
+  opacity: 1;
+  z-index: 1;
+}
+
+/* Card hover scaling (like it was before) */
+:global(.card):hover .imageActive {
+  transform: scale(1.05);
+}
+
+/* Invisible click areas for left/right navigation */
+.clickZones {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  z-index: 10;
+}
+
+.zoneLeft {
+  flex: 1;
+  cursor: pointer; /* Maybe a custom "prev" cursor later, but normal cursor is fine */
+}
+
+.zoneRight {
+  flex: 1;
+  cursor: pointer;
+}
+
+.dotsContainer {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+  transition: opacity 0.4s ease;
+  opacity: 0; /* Hidden by default */
+  pointer-events: none; /* Let clicks pass through to the zones */
+}
+
+.dotsVisible {
+  opacity: 1;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.dotActive {
+  background-color: #fff;
+  transform: scale(1.3);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}

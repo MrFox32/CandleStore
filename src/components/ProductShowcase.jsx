@@ -3,6 +3,7 @@ import styles from './ProductShowcase.module.css';
 import { products as staticProducts } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabaseClient';
+import ProductImageCarousel from './ProductImageCarousel';
 
 export default function ProductShowcase() {
   const { addItem } = useCart();
@@ -19,7 +20,20 @@ export default function ProductShowcase() {
       if (error) {
         console.error('Error fetching products:', error);
       } else if (data && data.length > 0) {
-        setProducts(data);
+        // ДОДАЄМО MOCK-ДАНІ для тестування каруселі:
+        const dataWithMockGallery = data.map((prod, index) => {
+          let images = [prod.image_url || prod.image];
+          // Додаємо тестові фото для перших двох товарів
+          if (index === 0) {
+            images.push('https://images.unsplash.com/photo-1602058448348-18eaf3a9cfa3?w=600&h=600&fit=crop');
+          } else if (index === 1) {
+            images.push('https://images.unsplash.com/photo-1620608518659-3fb78b4081c7?w=600&h=600&fit=crop');
+            images.push('https://images.unsplash.com/photo-1616053860264-b04331a4cc3b?w=600&h=600&fit=crop');
+          }
+          return { ...prod, images };
+        });
+        
+        setProducts(dataWithMockGallery);
       } else if (data && data.length === 0) {
         // Якщо база порожня, можна залишити статику або занулити
         // setProducts([]); 
@@ -43,7 +57,7 @@ export default function ProductShowcase() {
           {products.map((product) => (
             <div key={product.id} className={styles.card}>
               <div className={styles.imageWrapper}>
-                <img src={product.image || product.image_url} alt={product.name} className={styles.image} loading="lazy" />
+                <ProductImageCarousel images={product.images || [product.image_url || product.image]} altText={product.name} />
               </div>
               <div className={styles.cardInfo}>
                 <h3 className={styles.productName}>{product.name}</h3>
