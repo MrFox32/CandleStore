@@ -10,6 +10,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -72,6 +73,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     setUploading(true);
     setErrorMessage('');
+    setSuccessMessage('');
 
     let uploadedUrls = [...existingImages]; // Keep old images
 
@@ -109,8 +111,6 @@ export default function AdminDashboard() {
     };
 
     console.log("Відправка даних у Supabase:", productPayload);
-    // Тимчасовий alert для дебагу, щоб ми бачили що відправляємо
-    alert(`DEBUG (payload):\nImages: ${JSON.stringify(uploadedUrls)}\nTotal images: ${uploadedUrls.length}`);
 
     let error;
     if (editingProductId) {
@@ -122,11 +122,14 @@ export default function AdminDashboard() {
     }
 
     if (error) {
-      alert('Помилка: ' + error.message);
+      setErrorMessage('Помилка збереження: ' + error.message);
     } else {
-      alert(editingProductId ? 'Товар оновлено!' : 'Товар додано!');
+      setSuccessMessage(editingProductId ? 'Товар успішно оновлено!' : 'Товар успішно додано!');
       resetForm();
       fetchProducts();
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
     }
     setUploading(false);
   }
@@ -230,6 +233,11 @@ export default function AdminDashboard() {
                 {errorMessage && (
                   <div style={{ color: 'red', marginBottom: '10px', fontSize: '0.9rem', backgroundColor: '#ffe5e5', padding: '10px', borderRadius: '4px' }}>
                     {errorMessage}
+                  </div>
+                )}
+                {successMessage && (
+                  <div style={{ color: 'green', marginBottom: '10px', fontSize: '0.9rem', backgroundColor: '#e5ffe5', padding: '10px', borderRadius: '4px' }}>
+                    {successMessage}
                   </div>
                 )}
                 {existingImages.length > 0 && (
