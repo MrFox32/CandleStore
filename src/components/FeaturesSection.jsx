@@ -48,7 +48,7 @@ export default function FeaturesSection() {
     <section className={styles.featuresSection}>
       <div className="container">
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Чому обирають CandleStore?</h2>
+          <h2 className={styles.sectionTitle}>Чому обирають Cozy Corner?</h2>
         </div>
         <div className={styles.grid}>
           {features.map((feature, index) => (

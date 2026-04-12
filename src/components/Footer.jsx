@@ -46,7 +46,7 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={`container ${styles.footerContainer}`}>
         <div className={styles.brand}>
-          <div className={styles.logo}>CandleStore.</div>
+          <div className={styles.logo}>Cozy Corner.</div>
           <p className={styles.text}>Світло, що об'єднує.</p>
         </div>
 
@@ -64,7 +64,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <p className={styles.copy}>© {new Date().getFullYear()} CandleStore. Всі права захищено.</p>
+        <p className={styles.copy}>© {new Date().getFullYear()} Cozy Corner. Всі права захищено.</p>
       </div>
     </footer>
   );

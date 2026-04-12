@@ -4,7 +4,7 @@ import styles from './Header.module.css';
 // Inline SVG logo — no PNG artifacts, scales perfectly
 function LogoMark() {
   return (
-    <svg width="180" height="36" viewBox="0 0 180 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="CandleStore">
+    <svg width="180" height="36" viewBox="0 0 180 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Cozy Corner">
       {/* Flame icon */}
       <path
         d="M14 2C14 2 20 9 20 15.5C20 17.1 19.6 18.5 18.9 19.6C20.5 17.8 21.2 15.4 21 13.2C21 13.2 23.5 16 23.5 18.5C23.5 22.1 19.6 25 14 25C8.4 25 4.5 22.1 4.5 18.5C4.5 16 7 13.2 7 13.2C6.8 15.4 7.5 17.8 9.1 19.6C8.4 18.5 8 17.1 8 15.5C8 9 14 2 14 2Z"
@@ -21,12 +21,12 @@ function LogoMark() {
         x="32"
         y="25"
         fontFamily="'Montserrat', sans-serif"
-        fontSize="18"
+        fontSize="17"
         fontWeight="600"
         fill="#2A2A2A"
         letterSpacing="0.2"
       >
-        CandleStore.
+        Cozy Corner.
       </text>
     </svg>
   );
@@ -38,7 +38,7 @@ export default function Header() {
   return (
     <header className={styles.header}>
       <div className={`container ${styles.headerContent}`}>
-        <a href="#" className={styles.logoLink} aria-label="CandleStore — на головну">
+        <a href="#" className={styles.logoLink} aria-label="Cozy Corner — на головну">
           <LogoMark />
         </a>
         <nav className={styles.nav}>
