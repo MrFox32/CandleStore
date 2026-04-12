@@ -127,6 +127,11 @@
   width: 100%;
 }
 
+.addForm textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
 .row {
   display: flex;
   gap: 12px;

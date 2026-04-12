@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import styles from './Admin.module.css';
 
@@ -29,6 +29,14 @@ export default function AdminDashboard() {
   const [fileInputKey, setFileInputKey] = useState(Date.now()); // for forcing input clear
   const [existingImages, setExistingImages] = useState([]); // store existing URLs
   const [editingProductId, setEditingProductId] = useState(null);
+  const descriptionRef = useRef(null);
+
+  useEffect(() => {
+    if (descriptionRef.current) {
+      descriptionRef.current.style.height = 'auto';
+      descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
+    }
+  }, [formData.description]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -208,7 +216,13 @@ export default function AdminDashboard() {
               <h2>{editingProductId ? 'Редагувати товар' : 'Додати новий товар'}</h2>
               <form onSubmit={handleSubmitProduct} className={styles.addForm}>
                 <input type="text" placeholder="Назва товару" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
-                <textarea placeholder="Опис" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required />
+                <textarea 
+                  ref={descriptionRef}
+                  placeholder="Опис" 
+                  value={formData.description} 
+                  onChange={e => setFormData({...formData, description: e.target.value})} 
+                  required 
+                />
                 <div className={styles.row}>
                   <input type="number" placeholder="Ціна (₴)" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
                   <input type="number" placeholder="Кількість (шт)" value={formData.stock_quantity} onChange={e => setFormData({...formData, stock_quantity: e.target.value})} required />
