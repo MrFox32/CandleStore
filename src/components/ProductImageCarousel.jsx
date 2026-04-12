@@ -42,6 +42,17 @@ export default function ProductImageCarousel({ images, altText, productId }) {
     };
   }, []);
 
+  // Auto-play interval
+  useEffect(() => {
+    if (imageArray.length <= 1 || isHovered) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev === imageArray.length - 1 ? 0 : prev + 1));
+    }, 3000); // 3 seconds
+    
+    return () => clearInterval(interval);
+  }, [imageArray.length, isHovered]);
+
   const [hoverZone, setHoverZone] = useState(''); // 'left', 'center', 'right', or ''
 
   if (imageArray.length === 0) {
