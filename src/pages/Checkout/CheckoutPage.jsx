@@ -121,7 +121,7 @@ export default function CheckoutPage() {
             <div className={styles.summaryList}>
               {items.map(item => (
                 <div key={item.id} className={styles.summaryItem}>
-                  <img src={item.image} alt="" />
+                  <img src={item.image || item.image_url} alt={item.name} />
                   <div className={styles.summaryInfo}>
                     <p>{item.name} x {item.qty}</p>
                     <span>{item.price * item.qty} ₴</span>
