@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './ProductImageCarousel.module.css';
 
-export default function ProductImageCarousel({ images, altText }) {
+export default function ProductImageCarousel({ images, altText, productId }) {
+  const navigate = useNavigate();
   // Normalize images to array: if string is passed, make it an array. Filter out null/undefined.
   const imageArray = Array.isArray(images) ? images : [images].filter(Boolean);
   
@@ -40,6 +42,8 @@ export default function ProductImageCarousel({ images, altText }) {
     };
   }, []);
 
+  const [hoverZone, setHoverZone] = useState(''); // 'left', 'center', 'right', or ''
+
   if (imageArray.length === 0) {
     return <div className={styles.wrapper} style={{backgroundColor: 'var(--secondary-color)'}}></div>;
   }
@@ -48,11 +52,22 @@ export default function ProductImageCarousel({ images, altText }) {
   // Dots are visible if mouse is over the container OR if user recently switched via click/touch
   const showDots = isHovered || isSwitching;
 
+  const handleCenterClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (productId) {
+      navigate(`/product/${productId}`);
+    }
+  };
+
   return (
     <div 
       className={styles.wrapper}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setHoverZone('');
+      }}
     >
       {imageArray.map((imgUrl, index) => (
         <img
@@ -64,30 +79,56 @@ export default function ProductImageCarousel({ images, altText }) {
         />
       ))}
 
-      {hasMultiple && (
-        <>
-          <div className={styles.clickZones}>
+      {/* Shadow overlay block */}
+      <div 
+        className={`${styles.shadowOverlay} ${
+          hoverZone === 'left' ? styles.shadowLeft : 
+          hoverZone === 'center' ? styles.shadowCenter : 
+          hoverZone === 'right' ? styles.shadowRight : ''
+        }`} 
+      />
+
+      <div className={styles.clickZones}>
+        {hasMultiple ? (
+          <>
             <div 
               className={styles.zoneLeft} 
-              onClick={handlePrev} 
-              aria-label="Попереднє фото"
-            ></div>
+              onClick={handlePrev}
+              onMouseEnter={() => setHoverZone('left')}
+              title="Попереднє фото"
+            />
+            <div 
+              className={styles.zoneCenter} 
+              onClick={handleCenterClick}
+              onMouseEnter={() => setHoverZone('center')}
+              title="Перейти до товару"
+            />
             <div 
               className={styles.zoneRight} 
-              onClick={handleNext} 
-              aria-label="Наступне фото"
-            ></div>
-          </div>
+              onClick={handleNext}
+              onMouseEnter={() => setHoverZone('right')}
+              title="Наступне фото"
+            />
+          </>
+        ) : (
+          <div 
+            className={styles.zoneCenterFull} 
+            onClick={handleCenterClick}
+            onMouseEnter={() => setHoverZone('center')}
+            title="Перейти до товару"
+          />
+        )}
+      </div>
 
-          <div className={`${styles.dotsContainer} ${showDots ? styles.dotsVisible : ''}`}>
-            {imageArray.map((_, index) => (
-              <div 
-                key={index} 
-                className={`${styles.dot} ${index === currentIndex ? styles.dotActive : ''}`}
-              />
-            ))}
-          </div>
-        </>
+      {hasMultiple && (
+        <div className={`${styles.dotsContainer} ${showDots ? styles.dotsVisible : ''}`}>
+          {imageArray.map((_, index) => (
+            <div 
+              key={index} 
+              className={`${styles.dot} ${index === currentIndex ? styles.dotActive : ''}`}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

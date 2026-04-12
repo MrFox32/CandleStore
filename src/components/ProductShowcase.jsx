@@ -44,7 +44,11 @@ export default function ProductShowcase() {
           {products.map((product) => (
             <div key={product.id} className={styles.card}>
               <div className={styles.imageWrapper}>
-                <ProductImageCarousel images={product.images || [product.image_url || product.image]} altText={product.name} />
+                <ProductImageCarousel 
+                  images={product.images || [product.image_url || product.image]} 
+                  altText={product.name} 
+                  productId={product.id}
+                />
               </div>
               <div className={styles.cardInfo}>
                 <h3 className={styles.productName}>{product.name}</h3>

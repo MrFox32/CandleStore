@@ -13,6 +13,7 @@ import AdminLogin from './pages/Admin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import CheckoutPage from './pages/Checkout/CheckoutPage';
 import SuccessPage from './pages/Checkout/SuccessPage';
+import ProductPage from './pages/Product/ProductPage';
 
 function MainSite() {
   return (
@@ -54,6 +55,14 @@ function App() {
             path="/admin" 
             element={session ? <AdminDashboard /> : <AdminLogin />} 
           />
+          <Route path="/product/:id" element={
+            <>
+              <Header />
+              <CartDrawer />
+              <ProductPage />
+              <Footer />
+            </>
+          } />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/success" element={<SuccessPage />} />
           <Route path="*" element={<Navigate to="/" />} />

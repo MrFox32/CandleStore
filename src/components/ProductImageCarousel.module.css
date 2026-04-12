@@ -28,7 +28,33 @@
   transform: scale(1.05);
 }
 
-/* Invisible click areas for left/right navigation */
+/* Shadow overlays (with primary color inset shadows) */
+.shadowOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none; /* Allows clicks to pass to the zones below if needed, though visually it sits below zones */
+  z-index: 5;
+  transition: box-shadow 0.3s ease;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+/* Primary color #8E7060 / rgb(142, 112, 96) */
+.shadowLeft {
+  box-shadow: inset 100px 0 60px -50px rgba(142, 112, 96, 0.4);
+}
+
+.shadowRight {
+  box-shadow: inset -100px 0 60px -50px rgba(142, 112, 96, 0.4);
+}
+
+.shadowCenter {
+  box-shadow: inset 0 0 100px rgba(142, 112, 96, 0.5);
+}
+
+/* Invisible click areas for navigation */
 .clickZones {
   position: absolute;
   top: 0;
@@ -39,12 +65,17 @@
   z-index: 10;
 }
 
-.zoneLeft {
-  flex: 1;
-  cursor: pointer; /* Maybe a custom "prev" cursor later, but normal cursor is fine */
+.zoneLeft, .zoneRight {
+  flex: 1; /* 1 part */
+  cursor: pointer;
 }
 
-.zoneRight {
+.zoneCenter {
+  flex: 2; /* 2 parts of width for the center */
+  cursor: pointer;
+}
+
+.zoneCenterFull {
   flex: 1;
   cursor: pointer;
 }
