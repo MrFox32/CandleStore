@@ -353,3 +353,63 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Modal and Requests Table Styles */
+.fullWidthSection {
+  background: white;
+  padding: 30px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.table th, .table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.table th {
+  background-color: var(--surface-color);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 30px;
+  border-radius: var(--radius-md);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalInput, .modalSelect {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 1rem;
+}
+

@@ -7,6 +7,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('products'); // 'products' or 'orders'
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -31,6 +32,14 @@ export default function AdminDashboard() {
   const [editingProductId, setEditingProductId] = useState(null);
   const descriptionRef = useRef(null);
 
+  // Modal State for Request -> Order conversion
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [currentRequest, setCurrentRequest] = useState(null);
+  const [orderItems, setOrderItems] = useState([{ productId: '', qty: 1 }]);
+  const [orderCity, setOrderCity] = useState('');
+  const [orderWarehouse, setOrderWarehouse] = useState('');
+  const [orderProcessLoading, setOrderProcessLoading] = useState(false);
+
   useEffect(() => {
     if (descriptionRef.current) {
       descriptionRef.current.style.height = 'auto';
@@ -44,9 +53,22 @@ export default function AdminDashboard() {
       if (session) {
         fetchProducts();
         fetchOrders();
+        fetchRequests();
       }
     });
   }, []);
+
+  async function fetchRequests() {
+    const { data, error } = await supabase.from('contact_requests').select('*').order('created_at', { ascending: false });
+    if (error) console.error(error);
+    else setRequests(data || []);
+  }
+
+  async function updateRequestStatus(requestId, status) {
+    const { error } = await supabase.from('contact_requests').update({ status }).eq('id', requestId);
+    if (error) alert(error.message);
+    else fetchRequests();
+  }
 
   async function fetchProducts() {
     setLoading(true);
@@ -125,7 +147,7 @@ export default function AdminDashboard() {
       const { error: updateError } = await supabase.from('products').update(productPayload).eq('id', editingProductId);
       error = updateError;
     } else {
-      const { error: insertError } = await supabase.from('products').insert([productPayload]);
+    const { error: insertError } = await supabase.from('products').insert([productPayload]);
       error = insertError;
     }
 
@@ -140,6 +162,79 @@ export default function AdminDashboard() {
       setTimeout(() => setSuccessMessage(''), 3000);
     }
     setUploading(false);
+  }
+
+  function openCreateOrderModal(request) {
+    setCurrentRequest(request);
+    setOrderCity('');
+    setOrderWarehouse('');
+    setOrderItems([{ productId: '', qty: 1 }]);
+    setIsOrderModalOpen(true);
+  }
+
+  async function handleProcessOrderFromRequest() {
+    if (!orderCity || !orderWarehouse || orderItems.some(item => !item.productId || item.qty < 1)) {
+      alert("Заповніть всі поля та оберіть хоча б один товар");
+      return;
+    }
+
+    setOrderProcessLoading(true);
+
+    // Calculate total price
+    let totalPrice = 0;
+    const finalOrderItems = [];
+    
+    orderItems.forEach(item => {
+      const product = products.find(p => p.id === item.productId);
+      if (product) {
+        totalPrice += product.price * item.qty;
+        finalOrderItems.push({
+          product_id: product.id,
+          quantity: parseInt(item.qty),
+          price_at_purchase: product.price
+        });
+      }
+    });
+
+    // 1. Create order
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert([{
+        customer_name: currentRequest.name,
+        customer_phone: currentRequest.phone,
+        customer_email: currentRequest.contact_method === 'email' ? currentRequest.phone : '',
+        shipping_city: orderCity,
+        shipping_address: orderWarehouse,
+        total_price: totalPrice,
+        order_status: 'Нове'
+      }])
+      .select()
+      .single();
+
+    if (orderError) {
+      alert("Помилка створення замовлення: " + orderError.message);
+      setOrderProcessLoading(false);
+      return;
+    }
+
+    // 2. Insert order items
+    const dbOrderItems = finalOrderItems.map(item => ({ ...item, order_id: order.id }));
+    const { error: itemsError } = await supabase.from('order_items').insert(dbOrderItems);
+    
+    if (itemsError) {
+      alert("Помилка додавання товарів до замовлення: " + itemsError.message);
+      setOrderProcessLoading(false);
+      return;
+    }
+
+    // 3. Update request status
+    await supabase.from('contact_requests').update({ status: 'Створено замовлення' }).eq('id', currentRequest.id);
+    
+    setIsOrderModalOpen(false);
+    setOrderProcessLoading(false);
+    fetchRequests();
+    fetchOrders();
+    setActiveTab('orders'); // Redirect to orders tab
   }
 
   function resetForm() {
@@ -200,6 +295,12 @@ export default function AdminDashboard() {
                   onClick={() => setActiveTab('orders')}
                 >
                   Замовлення ({orders.filter(o => o.order_status === 'Нове').length})
+                </button>
+                <button 
+                  className={activeTab === 'requests' ? styles.activeTab : ''} 
+                  onClick={() => setActiveTab('requests')}
+                >
+                  Запити ({requests.filter(r => r.status === 'Новий').length})
                 </button>
               </nav>
             </div>
@@ -301,6 +402,65 @@ export default function AdminDashboard() {
               )}
             </section>
           </div>
+        ) : activeTab === 'requests' ? (
+          <div className={styles.ordersContainer}>
+            <h2>Всі запити на зворотній зв'язок</h2>
+            {loading ? <p>Завантаження запитів...</p> : (
+              <div className={styles.tableWrapper}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Дата</th>
+                      <th>Клієнт</th>
+                      <th>Контакт</th>
+                      <th>Канал</th>
+                      <th>Повідомлення</th>
+                      <th>Статус</th>
+                      <th>Дії</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {requests.map(r => (
+                      <tr key={r.id}>
+                        <td>{new Date(r.created_at).toLocaleString('uk-UA')}</td>
+                        <td>{r.name}</td>
+                        <td>{r.phone}</td>
+                        <td>{r.contact_method}</td>
+                        <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.message}</td>
+                        <td>
+                          <select 
+                            value={r.status} 
+                            onChange={(e) => updateRequestStatus(r.id, e.target.value)}
+                            disabled={r.status === 'Створено замовлення'}
+                          >
+                            <option value="Новий">Новий</option>
+                            <option value="В обробці">В обробці</option>
+                            <option value="Опрацьовано">Опрацьовано</option>
+                            <option value="Створено замовлення" disabled>Створено замовлення</option>
+                            <option value="Скасовано">Скасовано</option>
+                          </select>
+                        </td>
+                        <td>
+                          {r.status !== 'Створено замовлення' && (
+                            <button 
+                              className="btn btn-outline" 
+                              style={{ padding: '4px 8px', fontSize: '0.8rem' }}
+                              onClick={() => openCreateOrderModal(r)}
+                            >
+                              + Замовлення
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {requests.length === 0 && (
+                      <tr><td colSpan="7" style={{textAlign: 'center'}}>Немає запитів</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         ) : (
           <div className={styles.ordersContainer}>
             <h2>Усі замовлення</h2>
@@ -343,7 +503,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className={styles.orderItems}>
                       <h4>Товари:</h4>
-                      {order.order_items.map(item => (
+                      {order.order_items?.map(item => (
                         <div key={item.id} className={styles.orderItemRow}>
                           <span>{item.products?.name || 'Видалений товар'} x {item.quantity}</span>
                           <span>{item.price_at_purchase * item.quantity} ₴</span>
@@ -361,6 +521,76 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+
+      {/* CREATE ORDER MODAL */}
+      {isOrderModalOpen && currentRequest && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h2>Створення замовлення із заявки</h2>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Клієнт:</strong> {currentRequest.name} <br/>
+              <strong>Контакт:</strong> {currentRequest.phone} ({currentRequest.contact_method})
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label>Місто доставки:</label>
+              <input type="text" value={orderCity} onChange={e => setOrderCity(e.target.value)} placeholder="Київ" className={styles.modalInput} />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Відділення/Поштомат:</label>
+              <input type="text" value={orderWarehouse} onChange={e => setOrderWarehouse(e.target.value)} placeholder="Відділення №1" className={styles.modalInput} />
+            </div>
+
+            <div style={{ marginTop: '20px', marginBottom: '10px' }}>
+              <strong>Товари:</strong>
+            </div>
+            {orderItems.map((item, index) => (
+              <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <select 
+                  value={item.productId} 
+                  onChange={e => {
+                    const newItems = [...orderItems];
+                    newItems[index].productId = e.target.value;
+                    setOrderItems(newItems);
+                  }}
+                  className={styles.modalSelect}
+                  style={{ flex: 1 }}
+                >
+                  <option value="">Оберіть товар...</option>
+                  {products.map(p => (
+                    <option key={p.id} value={p.id}>{p.name} ({p.price} ₴)</option>
+                  ))}
+                </select>
+                <input 
+                  type="number" 
+                  min="1" 
+                  value={item.qty} 
+                  onChange={e => {
+                    const newItems = [...orderItems];
+                    newItems[index].qty = e.target.value;
+                    setOrderItems(newItems);
+                  }} 
+                  className={styles.modalInput}
+                  style={{ width: '80px' }}
+                />
+                <button type="button" onClick={() => setOrderItems(orderItems.filter((_, i) => i !== index))} className="btn btn-outline" style={{ padding: '0 10px' }}>×</button>
+              </div>
+            ))}
+            <button type="button" onClick={() => setOrderItems([...orderItems, { productId: '', qty: 1 }])} className="btn btn-outline" style={{ marginBottom: '20px', fontSize: '0.9rem' }}>+ Додати товар</button>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <button disabled={orderProcessLoading} className="btn btn-outline" onClick={() => setIsOrderModalOpen(false)}>Скасувати</button>
+              <button 
+                className="btn" 
+                onClick={handleProcessOrderFromRequest}
+                disabled={orderProcessLoading}
+              >
+                {orderProcessLoading ? 'Створення...' : 'Створити замовлення'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

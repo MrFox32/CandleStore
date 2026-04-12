@@ -1,23 +1,43 @@
 import { useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import styles from './ContactForm.module.css';
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState({ name: '', phone: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', contact_method: 'phone', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) {
       setError('Будь ласка, заповніть ім\'я та телефон');
       return;
     }
     setError('');
-    // Имітація відправки
-    setTimeout(() => {
-      setSubmitted(true);
-      setFormData({ name: '', phone: '', message: '' });
-    }, 500);
+    setIsSubmitting(true);
+
+    const { error: dbError } = await supabase
+      .from('contact_requests')
+      .insert([
+        { 
+          name: formData.name, 
+          phone: formData.phone, 
+          contact_method: formData.contact_method,
+          message: formData.message 
+        }
+      ]);
+
+    setIsSubmitting(false);
+
+    if (dbError) {
+      setError('Сталася помилка при відправці. Спробуйте пізніше.');
+      console.error(dbError);
+      return;
+    }
+
+    setSubmitted(true);
+    setFormData({ name: '', phone: '', contact_method: 'phone', message: '' });
   };
 
   return (
@@ -53,14 +73,30 @@ export default function ContactForm() {
               </div>
               
               <div className={styles.formGroup}>
-                <label htmlFor="phone">Номер телефону</label>
+                <label htmlFor="phone">Номер телефону / Username</label>
                 <input 
-                  type="tel" 
+                  type="text" 
                   id="phone" 
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  placeholder="+380"
+                  placeholder="+380... або @username"
                 />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="contact_method">Як краще з вами зв'язатись?</label>
+                <select 
+                  id="contact_method"
+                  value={formData.contact_method}
+                  onChange={(e) => setFormData({...formData, contact_method: e.target.value})}
+                  className={styles.selectInput}
+                >
+                  <option value="phone">Телефонний дзвінок</option>
+                  <option value="email">Електронна пошта</option>
+                  <option value="telegram">Telegram</option>
+                  <option value="viber">Viber</option>
+                  <option value="whatsapp">WhatsApp</option>
+                </select>
               </div>
               
               <div className={styles.formGroup}>
@@ -74,7 +110,9 @@ export default function ContactForm() {
                 ></textarea>
               </div>
               
-              <button type="submit" className={`btn ${styles.submitBtn}`}>Залишити заявку</button>
+              <button type="submit" className={`btn ${styles.submitBtn}`} disabled={isSubmitting}>
+                {isSubmitting ? 'Відправлення...' : 'Залишити заявку'}
+              </button>
             </form>
           )}
         </div>
