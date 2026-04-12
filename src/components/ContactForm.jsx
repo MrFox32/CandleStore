@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import styles from './ContactForm.module.css';
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState({ name: '', phone: '', contact_method: 'phone', message: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', contact_methods: ['Телефон'], message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,7 +23,7 @@ export default function ContactForm() {
         { 
           name: formData.name, 
           phone: formData.phone, 
-          contact_method: formData.contact_method,
+          contact_method: formData.contact_methods.join(', '),
           message: formData.message 
         }
       ]);
@@ -37,7 +37,7 @@ export default function ContactForm() {
     }
 
     setSubmitted(true);
-    setFormData({ name: '', phone: '', contact_method: 'phone', message: '' });
+    setFormData({ name: '', phone: '', contact_methods: ['Телефон'], message: '' });
   };
 
   return (
@@ -84,19 +84,26 @@ export default function ContactForm() {
               </div>
 
               <div className={styles.formGroup}>
-                <label htmlFor="contact_method">Як краще з вами зв'язатись?</label>
-                <select 
-                  id="contact_method"
-                  value={formData.contact_method}
-                  onChange={(e) => setFormData({...formData, contact_method: e.target.value})}
-                  className={styles.selectInput}
-                >
-                  <option value="phone">Телефонний дзвінок</option>
-                  <option value="email">Електронна пошта</option>
-                  <option value="telegram">Telegram</option>
-                  <option value="viber">Viber</option>
-                  <option value="whatsapp">WhatsApp</option>
-                </select>
+                <label>Як краще з вами зв'язатись?</label>
+                <div className={styles.checkboxGroup}>
+                  {['Телефон', 'Email', 'Telegram', 'Viber', 'WhatsApp'].map(method => (
+                    <label key={method} className={styles.checkboxLabel}>
+                      <input 
+                        type="checkbox"
+                        checked={formData.contact_methods.includes(method)}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          if (isChecked) {
+                            setFormData({...formData, contact_methods: [...formData.contact_methods, method]});
+                          } else {
+                            setFormData({...formData, contact_methods: formData.contact_methods.filter(m => m !== method)});
+                          }
+                        }}
+                      />
+                      {method}
+                    </label>
+                  ))}
+                </div>
               </div>
               
               <div className={styles.formGroup}>
