@@ -9,6 +9,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -68,9 +69,9 @@ export default function AdminDashboard() {
   }
 
   async function handleSubmitProduct(e) {
-    // ... (logic)
     e.preventDefault();
     setUploading(true);
+    setErrorMessage('');
 
     let uploadedUrls = [...existingImages]; // Keep old images
 
@@ -86,7 +87,9 @@ export default function AdminDashboard() {
           .upload(filePath, file);
 
         if (uploadError) {
-          alert(`Помилка завантаження фото ${file.name}: ` + uploadError.message);
+          setErrorMessage(`Помилка Storage (фото ${file.name}): ` + uploadError.message + `. Можливо не налаштовані RLS політики доступу або бакет не існує?`);
+          setUploading(false);
+          return; // Stop upload process and don't save to DB
         } else {
           const { data: { publicUrl } } = supabase.storage
             .from('candle-images')
@@ -224,6 +227,11 @@ export default function AdminDashboard() {
                     setImageFiles(files);
                   }} />
                 </div>
+                {errorMessage && (
+                  <div style={{ color: 'red', marginBottom: '10px', fontSize: '0.9rem', backgroundColor: '#ffe5e5', padding: '10px', borderRadius: '4px' }}>
+                    {errorMessage}
+                  </div>
+                )}
                 {existingImages.length > 0 && (
                   <div className={styles.existingImages}>
                     <p className={styles.label}>Поточні фотографії:</p>
