@@ -86,44 +86,41 @@ export default function ContactForm() {
                 />
               </div>
               
-              {formData.contact_methods.includes('Телефон') || formData.contact_methods.includes('Viber') || formData.contact_methods.includes('WhatsApp') ? (
-                <div className={styles.formGroup}>
-                  <label htmlFor="phone">Номер телефону</label>
-                  <input 
-                    type="text" 
-                    id="phone" 
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    placeholder="+380..."
-                  />
-                </div>
-              ) : null}
+              <div className={styles.formGroup}>
+                <label htmlFor="phone" className={!(formData.contact_methods.includes('Телефон') || formData.contact_methods.includes('Viber') || formData.contact_methods.includes('WhatsApp')) ? styles.disabledLabel : ''}>Номер телефону</label>
+                <input 
+                  type="text" 
+                  id="phone" 
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  disabled={!(formData.contact_methods.includes('Телефон') || formData.contact_methods.includes('Viber') || formData.contact_methods.includes('WhatsApp'))}
+                  placeholder="+380..."
+                />
+              </div>
 
-              {formData.contact_methods.includes('Email') && (
-                <div className={styles.formGroup}>
-                  <label htmlFor="email">Електронна пошта</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="your@email.com"
-                  />
-                </div>
-              )}
+              <div className={styles.formGroup}>
+                <label htmlFor="email" className={!formData.contact_methods.includes('Email') ? styles.disabledLabel : ''}>Електронна пошта</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  disabled={!formData.contact_methods.includes('Email')}
+                  placeholder="your@email.com"
+                />
+              </div>
 
-              {formData.contact_methods.includes('Telegram') && (
-                <div className={styles.formGroup}>
-                  <label htmlFor="telegram_username">Telegram Username</label>
-                  <input 
-                    type="text" 
-                    id="telegram_username" 
-                    value={formData.telegram_username}
-                    onChange={(e) => setFormData({...formData, telegram_username: e.target.value})}
-                    placeholder="@username"
-                  />
-                </div>
-              )}
+              <div className={styles.formGroup}>
+                <label htmlFor="telegram_username" className={!formData.contact_methods.includes('Telegram') ? styles.disabledLabel : ''}>Telegram Username</label>
+                <input 
+                  type="text" 
+                  id="telegram_username" 
+                  value={formData.telegram_username}
+                  onChange={(e) => setFormData({...formData, telegram_username: e.target.value})}
+                  disabled={!formData.contact_methods.includes('Telegram')}
+                  placeholder="@username"
+                />
+              </div>
 
               <div className={styles.formGroup}>
                 <label>Як краще з вами зв'язатись?</label>

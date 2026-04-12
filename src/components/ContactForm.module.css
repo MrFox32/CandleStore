@@ -107,6 +107,18 @@
   accent-color: var(--primary-color);
 }
 
+.formGroup input:disabled,
+.formGroup textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  border-color: #ddd;
+}
+
+.disabledLabel {
+  opacity: 0.5;
+}
+
 .submitBtn {
   width: 100%;
   margin-top: 8px;
