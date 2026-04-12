@@ -24,6 +24,7 @@ export default function AdminDashboard() {
     is_active: true
   });
   const [imageFiles, setImageFiles] = useState([]);
+  const [fileInputKey, setFileInputKey] = useState(Date.now()); // for forcing input clear
   const [existingImages, setExistingImages] = useState([]); // store existing URLs
   const [editingProductId, setEditingProductId] = useState(null);
 
@@ -126,6 +127,7 @@ export default function AdminDashboard() {
   function resetForm() {
     setFormData({ name: '', description: '', price: '', stock_quantity: '', category: '', weight_grams: '', length_cm: '', width_cm: '', height_cm: '', is_active: true });
     setImageFiles([]);
+    setFileInputKey(Date.now());
     setExistingImages([]);
     setEditingProductId(null);
   }
@@ -213,7 +215,10 @@ export default function AdminDashboard() {
                 </div>
                 <div className={styles.fileInput}>
                   <label>Додати фото (можна декілька):</label>
-                  <input type="file" multiple accept="image/*" onChange={e => setImageFiles(e.target.files)} />
+                  <input key={fileInputKey} type="file" multiple accept="image/*" onChange={e => {
+                    const files = Array.from(e.target.files || []);
+                    setImageFiles(files);
+                  }} />
                 </div>
                 {existingImages.length > 0 && (
                   <div className={styles.existingImages}>
