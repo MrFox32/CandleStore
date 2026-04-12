@@ -23,7 +23,9 @@ export default function AdminDashboard() {
     height_cm: '',
     is_active: true
   });
-  const [imageFile, setImageFile] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [existingImages, setExistingImages] = useState([]); // store existing URLs
+  const [editingProductId, setEditingProductId] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -64,46 +66,90 @@ export default function AdminDashboard() {
     else fetchOrders();
   }
 
-  async function handleAddProduct(e) {
-    // ... (unchanged handleAddProduct logic)
+  async function handleSubmitProduct(e) {
+    // ... (logic)
     e.preventDefault();
     setUploading(true);
 
-    let image_url = '';
-    if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `product-images/${fileName}`;
+    let uploadedUrls = [...existingImages]; // Keep old images
 
-      const { error: uploadError } = await supabase.storage
-        .from('candle-images')
-        .upload(filePath, imageFile);
+    if (imageFiles && imageFiles.length > 0) {
+      for (let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `product-images/${fileName}`;
 
-      if (uploadError) {
-        alert('Помилка завантаження фото: ' + uploadError.message);
-        setUploading(false);
-        return;
+        const { error: uploadError } = await supabase.storage
+          .from('candle-images')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          alert(`Помилка завантаження фото ${file.name}: ` + uploadError.message);
+        } else {
+          const { data: { publicUrl } } = supabase.storage
+            .from('candle-images')
+            .getPublicUrl(filePath);
+          uploadedUrls.push(publicUrl);
+        }
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('candle-images')
-        .getPublicUrl(filePath);
-      
-      image_url = publicUrl;
     }
 
-    const { error } = await supabase.from('products').insert([
-      { ...formData, image_url, price: parseFloat(formData.price) }
-    ]);
+    const image_url = uploadedUrls.length > 0 ? uploadedUrls[0] : '';
 
-    if (error) alert(error.message);
-    else {
-      alert('Товар додано!');
-      setFormData({ name: '', description: '', price: '', stock_quantity: '', category: '', weight_grams: '', length_cm: '', width_cm: '', height_cm: '', is_active: true });
-      setImageFile(null);
+    const productPayload = {
+      ...formData,
+      image_url,
+      images: uploadedUrls,
+      price: parseFloat(formData.price)
+    };
+
+    let error;
+    if (editingProductId) {
+      const { error: updateError } = await supabase.from('products').update(productPayload).eq('id', editingProductId);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase.from('products').insert([productPayload]);
+      error = insertError;
+    }
+
+    if (error) {
+      alert('Помилка: ' + error.message);
+    } else {
+      alert(editingProductId ? 'Товар оновлено!' : 'Товар додано!');
+      resetForm();
       fetchProducts();
     }
     setUploading(false);
+  }
+
+  function resetForm() {
+    setFormData({ name: '', description: '', price: '', stock_quantity: '', category: '', weight_grams: '', length_cm: '', width_cm: '', height_cm: '', is_active: true });
+    setImageFiles([]);
+    setExistingImages([]);
+    setEditingProductId(null);
+  }
+
+  function handleEditClick(product) {
+    setFormData({
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || '',
+      stock_quantity: product.stock_quantity || '',
+      category: product.category || '',
+      weight_grams: product.weight_grams || '',
+      length_cm: product.length_cm || '',
+      width_cm: product.width_cm || '',
+      height_cm: product.height_cm || '',
+      is_active: product.is_active !== undefined ? product.is_active : true
+    });
+    setExistingImages(product.images || [product.image_url].filter(Boolean));
+    setEditingProductId(product.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function handleRemoveExistingImage(index) {
+    setExistingImages(existingImages.filter((_, i) => i !== index));
   }
 
   async function handleDelete(id) {
@@ -147,8 +193,8 @@ export default function AdminDashboard() {
           <div className={styles.grid}>
             {/* Products Form & List */}
             <section className={styles.formContainer}>
-              <h2>Додати новий товар</h2>
-              <form onSubmit={handleAddProduct} className={styles.addForm}>
+              <h2>{editingProductId ? 'Редагувати товар' : 'Додати новий товар'}</h2>
+              <form onSubmit={handleSubmitProduct} className={styles.addForm}>
                 <input type="text" placeholder="Назва товару" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
                 <textarea placeholder="Опис" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required />
                 <div className={styles.row}>
@@ -166,12 +212,32 @@ export default function AdminDashboard() {
                   <input type="number" placeholder="В" value={formData.height_cm} onChange={e => setFormData({...formData, height_cm: e.target.value})} required />
                 </div>
                 <div className={styles.fileInput}>
-                  <label>Фото товару:</label>
-                  <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} required />
+                  <label>Додати фото (можна декілька):</label>
+                  <input type="file" multiple accept="image/*" onChange={e => setImageFiles(e.target.files)} />
                 </div>
-                <button type="submit" className="btn" disabled={uploading}>
-                  {uploading ? 'Зберігання...' : 'Опублікувати'}
-                </button>
+                {existingImages.length > 0 && (
+                  <div className={styles.existingImages}>
+                    <p className={styles.label}>Поточні фотографії:</p>
+                    <div className={styles.thumbnails}>
+                      {existingImages.map((url, i) => (
+                        <div key={i} className={styles.thumbWrapper}>
+                          <img src={url} alt="" className={styles.thumb} />
+                          <button type="button" onClick={() => handleRemoveExistingImage(i)}>×</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button type="submit" className="btn" disabled={uploading}>
+                    {uploading ? 'Зберігання...' : (editingProductId ? 'Зберегти зміни' : 'Опублікувати')}
+                  </button>
+                  {editingProductId && (
+                    <button type="button" className="btn" style={{background: 'var(--border-color)', color: '#333'}} onClick={resetForm} disabled={uploading}>
+                      Скасувати
+                    </button>
+                  )}
+                </div>
               </form>
             </section>
 
@@ -186,7 +252,10 @@ export default function AdminDashboard() {
                         <h4>{p.name}</h4>
                         <span>{p.price} ₴ | {p.stock_quantity} шт</span>
                       </div>
-                      <button className={styles.deleteBtn} onClick={() => handleDelete(p.id)}>×</button>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn" style={{padding: '5px 10px', fontSize: '0.8rem', flex: 1}} onClick={() => handleEditClick(p)}>✎ Редагувати</button>
+                        <button className={styles.deleteBtn} style={{position: 'static', borderRadius: '4px', width: '30px', height: '30px'}} onClick={() => handleDelete(p.id)}>×</button>
+                      </div>
                     </div>
                   ))}
                 </div>
