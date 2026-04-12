@@ -106,6 +106,8 @@ export default function AdminDashboard() {
     };
 
     console.log("Відправка даних у Supabase:", productPayload);
+    // Тимчасовий alert для дебагу, щоб ми бачили що відправляємо
+    alert(`DEBUG (payload):\nImages: ${JSON.stringify(uploadedUrls)}\nTotal images: ${uploadedUrls.length}`);
 
     let error;
     if (editingProductId) {
