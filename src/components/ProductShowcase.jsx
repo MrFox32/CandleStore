@@ -9,6 +9,7 @@ export default function ProductShowcase() {
   const { addItem } = useCart();
   const [products, setProducts] = useState(staticProducts);
   const [loading, setLoading] = useState(true);
+  const [hoveredCardId, setHoveredCardId] = useState(null);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -42,12 +43,18 @@ export default function ProductShowcase() {
         
         <div className={styles.grid}>
           {products.map((product) => (
-            <div key={product.id} className={styles.card}>
+            <div 
+              key={product.id} 
+              className={styles.card}
+              onMouseEnter={() => setHoveredCardId(product.id)}
+              onMouseLeave={() => setHoveredCardId(null)}
+            >
               <div className={styles.imageWrapper}>
                 <ProductImageCarousel 
                   images={product.images || [product.image_url || product.image]} 
                   altText={product.name} 
                   productId={product.id}
+                  isCardHovered={hoveredCardId === product.id}
                 />
               </div>
               <div className={styles.cardInfo}>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ProductImageCarousel.module.css';
 
-export default function ProductImageCarousel({ images, altText, productId }) {
+export default function ProductImageCarousel({ images, altText, productId, isCardHovered }) {
   const navigate = useNavigate();
   // Normalize images to array: if string is passed, make it an array. Filter out null/undefined.
   const imageArray = Array.isArray(images) ? images : [images].filter(Boolean);
@@ -11,6 +11,12 @@ export default function ProductImageCarousel({ images, altText, productId }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const timeoutRef = useRef(null);
+
+  // Use refs to access latest values in the interval without causing the interval to reset
+  const isCardHoveredRef = useRef(isCardHovered);
+  useEffect(() => {
+    isCardHoveredRef.current = isCardHovered;
+  }, [isCardHovered]);
 
   const handleNext = (e) => {
     e.preventDefault(); // Prevent navigating if wrapped in a link
@@ -36,22 +42,37 @@ export default function ProductImageCarousel({ images, altText, productId }) {
     }, 2000); // 2 seconds delay
   };
 
+  // Auto-play synchronized global interval
+  useEffect(() => {
+    if (imageArray.length <= 1) return;
+    
+    const handleTick = () => {
+      // Skip the tick if this specific card/carousel is hovered
+      if (!isCardHoveredRef.current) {
+        setCurrentIndex((prev) => (prev === imageArray.length - 1 ? 0 : prev + 1));
+      }
+    };
+
+    const intervalMs = 5000; // 5 seconds
+    const delay = intervalMs - (Date.now() % intervalMs);
+    let intervalId;
+
+    const timeoutId = setTimeout(() => {
+      handleTick();
+      intervalId = setInterval(handleTick, intervalMs);
+    }, delay);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [imageArray.length]); // Empty dependency ensures timer never resets, keeping perfect sync
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
-
-  // Auto-play interval
-  useEffect(() => {
-    if (imageArray.length <= 1 || isHovered) return;
-    
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev === imageArray.length - 1 ? 0 : prev + 1));
-    }, 3000); // 3 seconds
-    
-    return () => clearInterval(interval);
-  }, [imageArray.length, isHovered]);
 
   const [hoverZone, setHoverZone] = useState(''); // 'left', 'center', 'right', or ''
 
