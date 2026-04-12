@@ -43,15 +43,15 @@
 
 /* Primary color #8E7060 / rgb(142, 112, 96) */
 .shadowLeft {
-  box-shadow: inset 180px 0 80px -60px rgba(142, 112, 96, 0.7);
+  box-shadow: inset 140px 0 70px -55px rgba(142, 112, 96, 0.55);
 }
 
 .shadowRight {
-  box-shadow: inset -180px 0 80px -60px rgba(142, 112, 96, 0.7);
+  box-shadow: inset -140px 0 70px -55px rgba(142, 112, 96, 0.55);
 }
 
 .shadowCenter {
-  box-shadow: inset 0 0 150px rgba(142, 112, 96, 0.8);
+  box-shadow: inset 0 0 120px rgba(142, 112, 96, 0.6);
 }
 
 /* Invisible click areas for navigation */
