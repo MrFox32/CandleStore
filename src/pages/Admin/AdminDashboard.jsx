@@ -424,7 +424,11 @@ export default function AdminDashboard() {
                       <tr key={r.id}>
                         <td>{new Date(r.created_at).toLocaleString('uk-UA')}</td>
                         <td>{r.name}</td>
-                        <td>{r.phone}</td>
+                        <td>
+                          {r.phone && <div>📞 {r.phone}</div>}
+                          {r.email && <div>📧 {r.email}</div>}
+                          {r.telegram_username && <div>💬 {r.telegram_username}</div>}
+                        </td>
                         <td>{r.contact_method}</td>
                         <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.message}</td>
                         <td>
@@ -529,7 +533,12 @@ export default function AdminDashboard() {
             <h2>Створення замовлення із заявки</h2>
             <div style={{ marginBottom: '15px' }}>
               <strong>Клієнт:</strong> {currentRequest.name} <br/>
-              <strong>Контакт:</strong> {currentRequest.phone} ({currentRequest.contact_method})
+              <strong>Контакт:</strong> 
+              {currentRequest.phone && <span style={{marginLeft: '5px'}}>📞 {currentRequest.phone}</span>}
+              {currentRequest.email && <span style={{marginLeft: '5px'}}>📧 {currentRequest.email}</span>}
+              {currentRequest.telegram_username && <span style={{marginLeft: '5px'}}>💬 {currentRequest.telegram_username}</span>}
+              <br/>
+              <small>Канал: {currentRequest.contact_method}</small>
             </div>
             
             <div className={styles.formGroup}>

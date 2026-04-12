@@ -3,15 +3,27 @@ import { supabase } from '../lib/supabaseClient';
 import styles from './ContactForm.module.css';
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState({ name: '', phone: '', contact_methods: ['Телефон'], message: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', telegram_username: '', contact_methods: ['Телефон'], message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) {
-      setError('Будь ласка, заповніть ім\'я та телефон');
+    if (!formData.name) {
+      setError('Будь ласка, заповніть ім\'я');
+      return;
+    }
+    if (formData.contact_methods.includes('Телефон') && !formData.phone) {
+      setError('Будь ласка, введіть номер телефону');
+      return;
+    }
+    if (formData.contact_methods.includes('Email') && !formData.email) {
+      setError('Будь ласка, введіть Email');
+      return;
+    }
+    if ((formData.contact_methods.includes('Telegram') || formData.contact_methods.includes('Viber') || formData.contact_methods.includes('WhatsApp')) && !formData.telegram_username && !formData.phone) {
+      setError('Будь ласка, введіть номер телефону або Username для месенджера');
       return;
     }
     setError('');
@@ -23,6 +35,8 @@ export default function ContactForm() {
         { 
           name: formData.name, 
           phone: formData.phone, 
+          email: formData.email,
+          telegram_username: formData.telegram_username,
           contact_method: formData.contact_methods.join(', '),
           message: formData.message 
         }
@@ -37,7 +51,7 @@ export default function ContactForm() {
     }
 
     setSubmitted(true);
-    setFormData({ name: '', phone: '', contact_methods: ['Телефон'], message: '' });
+    setFormData({ name: '', phone: '', email: '', telegram_username: '', contact_methods: ['Телефон'], message: '' });
   };
 
   return (
@@ -72,16 +86,44 @@ export default function ContactForm() {
                 />
               </div>
               
-              <div className={styles.formGroup}>
-                <label htmlFor="phone">Номер телефону / Username</label>
-                <input 
-                  type="text" 
-                  id="phone" 
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  placeholder="+380... або @username"
-                />
-              </div>
+              {formData.contact_methods.includes('Телефон') || formData.contact_methods.includes('Viber') || formData.contact_methods.includes('WhatsApp') ? (
+                <div className={styles.formGroup}>
+                  <label htmlFor="phone">Номер телефону</label>
+                  <input 
+                    type="text" 
+                    id="phone" 
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    placeholder="+380..."
+                  />
+                </div>
+              ) : null}
+
+              {formData.contact_methods.includes('Email') && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="email">Електронна пошта</label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    placeholder="your@email.com"
+                  />
+                </div>
+              )}
+
+              {formData.contact_methods.includes('Telegram') && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="telegram_username">Telegram Username</label>
+                  <input 
+                    type="text" 
+                    id="telegram_username" 
+                    value={formData.telegram_username}
+                    onChange={(e) => setFormData({...formData, telegram_username: e.target.value})}
+                    placeholder="@username"
+                  />
+                </div>
+              )}
 
               <div className={styles.formGroup}>
                 <label>Як краще з вами зв'язатись?</label>
