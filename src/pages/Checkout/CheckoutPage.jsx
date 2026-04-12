@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { supabase } from '../../lib/supabaseClient';
 import styles from './CheckoutPage.module.css';
@@ -73,6 +73,7 @@ export default function CheckoutPage() {
   return (
     <div className={styles.checkoutLayout}>
       <div className="container section-padding">
+        <Link to="/" className={styles.backLink}>← Повернутися на головну сторінку</Link>
         <h1>Оформлення замовлення</h1>
         
         <div className={styles.grid}>
