@@ -6,6 +6,7 @@ import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import FeaturesSection from './components/FeaturesSection';
 import ProductShowcase from './components/ProductShowcase';
+import ReviewsSection from './components/ReviewsSection';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
@@ -24,6 +25,7 @@ function MainSite() {
         <HeroSection />
         <FeaturesSection />
         <ProductShowcase />
+        <ReviewsSection />
         <ContactForm />
       </main>
       <Footer />

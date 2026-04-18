@@ -4,6 +4,7 @@ import { products as staticProducts } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabaseClient';
 import ProductImageCarousel from './ProductImageCarousel';
+import CandleRating from './CandleRating';
 
 export default function ProductShowcase() {
   const { addItem } = useCart();
@@ -58,6 +59,9 @@ export default function ProductShowcase() {
                 />
               </div>
               <div className={styles.cardInfo}>
+                <div className={styles.ratingWrapper}>
+                  <CandleRating rating={product.rating || 4.5} size={24} showNumber={true} />
+                </div>
                 <h3 className={styles.productName}>{product.name}</h3>
                 <p className={styles.productDesc}>{product.description}</p>
                 <div className={styles.cardFooter}>

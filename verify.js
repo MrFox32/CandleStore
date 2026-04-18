@@ -8,9 +8,10 @@ const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY
 
 async function checkRestInterface() {
   try {
-    const res = await axios.get(`${supabaseUrl}/rest/v1/?apikey=${supabaseAnonKey}`, {
+    const res = await axios.get(`${supabaseUrl}/rest/v1/`, {
       headers: {
-        'apikey': supabaseAnonKey
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`
       }
     });
     const openapi = res.data;

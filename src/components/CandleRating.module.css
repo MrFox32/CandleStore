@@ -1,0 +1,79 @@
+.ratingContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.candles {
+  display: flex;
+  gap: 4px;
+}
+
+.flameWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Still needed to hide the candle body */
+}
+
+.emptyFlame {
+  position: absolute;
+  top: 5%; /* Aligned with the lifted active flame */
+  left: 0;
+  width: 100%;
+  height: 70%;
+  z-index: 1;
+  opacity: 0.15;
+  color: var(--primary-color);
+}
+
+.emptyFlame svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lottieContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.lottieScaler {
+  position: absolute;
+  top: -55%; /* Shifted higher up for clear visibility above the rating baseline */
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  /* Slightly more scale for impact */
+  transform: translateX(-50%) scale(2.8);
+  transform-origin: top center;
+  pointer-events: none;
+}
+
+/* Deeply target the canvas/svg of the player */
+.lottieScaler :global(div), 
+.lottieScaler :global(svg),
+.lottieScaler :global(canvas) {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+.ratingValue {
+  font-size: 0.9em;
+  font-weight: 700;
+  color: var(--primary-color);
+  font-family: var(--font-heading);
+  margin-left: 8px;
+  opacity: 0.95;
+  display: flex;
+  align-items: center;
+  transform: translateY(25%); /* Perfectly centered with the flickering flame midpoint */
+}

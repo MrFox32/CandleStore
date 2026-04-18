@@ -69,6 +69,18 @@
   margin-bottom: 20px;
 }
 
+.ratingSummary {
+  display: flex;
+  align-items: center; /* Centered for a more modern, balanced look with the taller flame containers */
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.reviewsCount {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
 .price {
   font-size: 1.75rem;
   font-weight: 500;
@@ -186,5 +198,104 @@
   
   .title {
     font-size: 2rem;
+  }
+}
+
+/* REVIEWS SECTION STYLES */
+.reviewsSection {
+  margin-top: 80px;
+  padding-top: 60px;
+  border-top: 1px solid var(--border-color);
+}
+
+.reviewsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Aligning from the top to allow precise nudging */
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.reviewsTitle {
+  font-size: 2.2rem;
+  color: var(--text-main);
+  margin-bottom: 0;
+  padding-top: 0.95rem; /* Precisely tuned to align the midline of the text with the midpoint of the large 4.8 */
+}
+
+.overallRating {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Right-align since it's on the right side of the layout */
+  gap: 12px;
+  text-align: right;
+}
+
+.bigRating {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.basedOn {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  max-width: 800px;
+}
+
+.reviewItem {
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.08);
+}
+
+.reviewItem:last-child {
+  border-bottom: none;
+}
+
+.reviewMeta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.reviewAuthor {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 1.15rem;
+}
+
+.reviewDate {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.reviewRating {
+  margin-bottom: 16px;
+}
+
+.reviewComment {
+  line-height: 1.7;
+  color: var(--text-main);
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .reviewsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .reviewsTitle {
+    padding-top: 0; /* Clear alignment nudge on mobile stacking */
+    font-size: 1.8rem;
   }
 }

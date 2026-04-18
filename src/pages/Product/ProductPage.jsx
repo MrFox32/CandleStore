@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import { useCart } from '../../context/CartContext';
 import ProductImageCarousel from '../../components/ProductImageCarousel';
+import CandleRating from '../../components/CandleRating';
 import styles from './ProductPage.module.css';
 
 export default function ProductPage() {
@@ -66,6 +67,10 @@ export default function ProductPage() {
           <div className={styles.infoSection}>
             <span className={styles.categoryBadge}>{product.category || 'Подарунковий набір'}</span>
             <h1 className={styles.title}>{product.name}</h1>
+            <div className={styles.ratingSummary}>
+              <CandleRating rating={product.rating || 4.8} size={32} showNumber={true} />
+              <span className={styles.reviewsCount}>(12 відгуків)</span>
+            </div>
             <p className={styles.price}>{product.price} ₴</p>
             
             <div className={styles.divider}></div>
@@ -107,6 +112,37 @@ export default function ProductPage() {
             >
               {product.stock_quantity > 0 ? '+ ДОДАТИ В КОШИК' : 'НЕМАЄ В НАЯВНОСТІ'}
             </button>
+          </div>
+        </div>
+
+        {/* REVIEWS SECTION */}
+        <div className={styles.reviewsSection}>
+          <div className={styles.reviewsHeader}>
+            <h2 className={styles.reviewsTitle}>Відгуки покупців</h2>
+            <div className={styles.overallRating}>
+              <span className={styles.bigRating}>{product.rating || 4.8}</span>
+              <CandleRating rating={product.rating || 4.8} size={40} />
+              <span className={styles.basedOn}>На основі 12 відгуків</span>
+            </div>
+          </div>
+
+          <div className={styles.reviewsList}>
+            {[
+              { id: 1, author: 'Марина', rating: 5, comment: 'Неймовірний аромат! Свічка горить дуже довго, а запах лаванди розслабляє після робочого дня. Упаковка — це окремий вид мистецтва.', date: '3 дні тому' },
+              { id: 2, author: 'Олег', rating: 4.5, comment: 'Дуже гарний набір. Брав на подарунок дівчині, вона в захваті. Зірочку зняв за невелику затримку в доставці, але якість свічок це компенсує.', date: '1 тиждень тому' },
+              { id: 3, author: 'Юлія', rating: 5, comment: 'Це вже моя третя покупка в Cozy Corner. Натуральний віск — це те, що я шукала. Ніякого хімічного запаху, тільки чиста насолода.', date: '2 тижні тому' }
+            ].map(review => (
+              <div key={review.id} className={styles.reviewItem}>
+                <div className={styles.reviewMeta}>
+                  <span className={styles.reviewAuthor}>{review.author}</span>
+                  <span className={styles.reviewDate}>{review.date}</span>
+                </div>
+                <div className={styles.reviewRating}>
+                  <CandleRating rating={review.rating} size={20} showNumber={true} />
+                </div>
+                <p className={styles.reviewComment}>"{review.comment}"</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
