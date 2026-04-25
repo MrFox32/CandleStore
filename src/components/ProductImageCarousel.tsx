@@ -2,15 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ProductImageCarousel.module.css';
 
-export default function ProductImageCarousel({ images, altText, productId, isCardHovered }) {
+interface ProductImageCarouselProps {
+  images: string | string[];
+  altText: string;
+  productId?: string | number;
+  isCardHovered?: boolean;
+}
+
+export default function ProductImageCarousel({ images, altText, productId, isCardHovered = false }: ProductImageCarouselProps) {
   const navigate = useNavigate();
   // Normalize images to array: if string is passed, make it an array. Filter out null/undefined.
-  const imageArray = Array.isArray(images) ? images : [images].filter(Boolean);
+  const imageArray = Array.isArray(images) ? images : [images].filter(Boolean) as string[];
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
-  const timeoutRef = useRef(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Use refs to access latest values in the interval without causing the interval to reset
   const isCardHoveredRef = useRef(isCardHovered);
@@ -18,7 +25,7 @@ export default function ProductImageCarousel({ images, altText, productId, isCar
     isCardHoveredRef.current = isCardHovered;
   }, [isCardHovered]);
 
-  const handleNext = (e) => {
+  const handleNext = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigating if wrapped in a link
     e.stopPropagation();
     if (imageArray.length <= 1) return;
@@ -26,7 +33,7 @@ export default function ProductImageCarousel({ images, altText, productId, isCar
     showDotsTemporarily();
   };
 
-  const handlePrev = (e) => {
+  const handlePrev = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (imageArray.length <= 1) return;
@@ -55,7 +62,7 @@ export default function ProductImageCarousel({ images, altText, productId, isCar
 
     const intervalMs = 5000; // 5 seconds
     const delay = intervalMs - (Date.now() % intervalMs);
-    let intervalId;
+    let intervalId: ReturnType<typeof setInterval>;
 
     const timeoutId = setTimeout(() => {
       handleTick();
@@ -74,7 +81,7 @@ export default function ProductImageCarousel({ images, altText, productId, isCar
     };
   }, []);
 
-  const [hoverZone, setHoverZone] = useState(''); // 'left', 'center', 'right', or ''
+  const [hoverZone, setHoverZone] = useState<'left' | 'center' | 'right' | ''>(''); 
 
   if (imageArray.length === 0) {
     return <div className={styles.wrapper} style={{backgroundColor: 'var(--secondary-color)'}}></div>;
@@ -84,7 +91,7 @@ export default function ProductImageCarousel({ images, altText, productId, isCar
   // Dots are visible if mouse is over the container OR if user recently switched via click/touch
   const showDots = isHovered || isSwitching;
 
-  const handleCenterClick = (e) => {
+  const handleCenterClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (productId) {

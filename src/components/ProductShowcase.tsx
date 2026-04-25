@@ -5,12 +5,13 @@ import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabaseClient';
 import ProductImageCarousel from './ProductImageCarousel';
 import CandleRating from './CandleRating';
+import { Product } from '../types';
 
 export default function ProductShowcase() {
   const { addItem } = useCart();
-  const [products, setProducts] = useState(staticProducts);
+  const [products, setProducts] = useState<Product[]>(staticProducts);
   const [loading, setLoading] = useState(true);
-  const [hoveredCardId, setHoveredCardId] = useState(null);
+  const [hoveredCardId, setHoveredCardId] = useState<string | number | null>(null);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -22,10 +23,7 @@ export default function ProductShowcase() {
       if (error) {
         console.error('Error fetching products:', error);
       } else if (data && data.length > 0) {
-        setProducts(data);
-      } else if (data && data.length === 0) {
-        // Якщо база порожня, можна залишити статику або занулити
-        // setProducts([]); 
+        setProducts(data as Product[]);
       }
       setLoading(false);
     }
@@ -52,7 +50,7 @@ export default function ProductShowcase() {
             >
               <div className={styles.imageWrapper}>
                 <ProductImageCarousel 
-                  images={product.images || [product.image_url || product.image]} 
+                  images={product.images || [(product.image_url || product.image)]} 
                   altText={product.name} 
                   productId={product.id}
                   isCardHovered={hoveredCardId === product.id}

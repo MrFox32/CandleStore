@@ -1,7 +1,15 @@
 import React from 'react';
 import styles from './ReviewsSection.module.css';
 
-const reviews = [
+interface Review {
+  id: number;
+  name: string;
+  text: string;
+  rating: number;
+  date: string;
+}
+
+const reviews: Review[] = [
   {
     id: 1,
     name: 'Олена К.',
@@ -12,7 +20,7 @@ const reviews = [
   {
     id: 2,
     name: 'Андрій М.',
-    text: 'Шукав подарунок мамі, вибір випав на Cozy Corner. Упаковка просто неймовірна, навіть не треба було нічого додавати. Мама в захваті!',
+    text: 'Шукав подарунок мамі, вибір випав на Flama Mia. Упаковка просто неймовірна, навіть не треба було нічого додавати. Мама в захваті!',
     rating: 5,
     date: '5 Квітня, 2026'
   },
@@ -25,7 +33,11 @@ const reviews = [
   }
 ];
 
-const StarRating = ({ rating }) => {
+interface StarRatingProps {
+  rating: number;
+}
+
+const StarRating: React.FC<StarRatingProps> = ({ rating }) => {
   return (
     <div className={styles.stars}>
       {[...Array(5)].map((_, i) => (

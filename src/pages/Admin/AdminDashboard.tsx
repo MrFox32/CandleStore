@@ -1,20 +1,42 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import styles from './Admin.module.css';
+import { Session } from '@supabase/supabase-js';
+import { Product, Order, ContactRequest } from '../../types';
+import { NovaPoshtaSelects } from '../../components/NovaPoshtaSelects';
+import { novaPoshtaService } from '../../services/novaPoshta';
+
+interface ProductFormData {
+  name: string;
+  description: string;
+  price: string | number;
+  stock_quantity: string | number;
+  category: string;
+  weight_grams: string | number;
+  length_cm: string | number;
+  width_cm: string | number;
+  height_cm: string | number;
+  is_active: boolean;
+}
+
+interface OrderItemInput {
+  productId: string;
+  qty: number;
+}
 
 export default function AdminDashboard() {
-  const [session, setSession] = useState(null);
-  const [activeTab, setActiveTab] = useState('products'); // 'products' or 'orders'
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [requests, setRequests] = useState([]);
+  const [session, setSession] = useState<Session | null>(null);
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'requests'>('products');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [requests, setRequests] = useState<ContactRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     description: '',
     price: '',
@@ -26,19 +48,24 @@ export default function AdminDashboard() {
     height_cm: '',
     is_active: true
   });
-  const [imageFiles, setImageFiles] = useState([]);
-  const [fileInputKey, setFileInputKey] = useState(Date.now()); // for forcing input clear
-  const [existingImages, setExistingImages] = useState([]); // store existing URLs
-  const [editingProductId, setEditingProductId] = useState(null);
-  const descriptionRef = useRef(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [fileInputKey, setFileInputKey] = useState(Date.now());
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [editingProductId, setEditingProductId] = useState<string | number | null>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   // Modal State for Request -> Order conversion
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-  const [currentRequest, setCurrentRequest] = useState(null);
-  const [orderItems, setOrderItems] = useState([{ productId: '', qty: 1 }]);
+  const [currentRequest, setCurrentRequest] = useState<ContactRequest | null>(null);
+  const [orderItems, setOrderItems] = useState<OrderItemInput[]>([{ productId: '', qty: 1 }]);
   const [orderCity, setOrderCity] = useState('');
   const [orderWarehouse, setOrderWarehouse] = useState('');
+  const [orderNpCityRef, setOrderNpCityRef] = useState('');
+  const [orderNpWarehouseRef, setOrderNpWarehouseRef] = useState('');
   const [orderProcessLoading, setOrderProcessLoading] = useState(false);
+  const [adminError, setAdminError] = useState<{orderId: string, message: string} | null>(null);
+  const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
+  const [copiedTtn, setCopiedTtn] = useState<string | null>(null);
 
   useEffect(() => {
     if (descriptionRef.current) {
@@ -64,7 +91,7 @@ export default function AdminDashboard() {
     else setRequests(data || []);
   }
 
-  async function updateRequestStatus(requestId, status) {
+  async function updateRequestStatus(requestId: string, status: string) {
     const { error } = await supabase.from('contact_requests').update({ status }).eq('id', requestId);
     if (error) alert(error.message);
     else fetchRequests();
@@ -87,25 +114,74 @@ export default function AdminDashboard() {
     else setOrders(data || []);
   }
 
-  async function updateOrderStatus(orderId, status) {
+  async function updateOrderStatus(orderId: string, status: string) {
     const { error } = await supabase.from('orders').update({ order_status: status }).eq('id', orderId);
     if (error) alert(error.message);
     else fetchOrders();
   }
 
-  async function updatePaymentStatus(orderId, status) {
+  async function handleCreateWaybill(order: Order) {
+    if (!order.np_city_ref || !order.np_warehouse_ref) {
+      alert("Відсутні дані для створення ТТН (місто або відділення)");
+      return;
+    }
+
+    setProcessingOrderId(order.id);
+    setLoading(true);
+    try {
+      const res = await novaPoshtaService.createDocument({
+        recipientName: order.customer_name,
+        recipientPhone: order.customer_phone,
+        cityRecipient: order.np_city_ref,
+        warehouseRecipient: order.np_warehouse_ref,
+        cost: order.total_price,
+        weight: (order.order_items?.reduce((sum, item) => sum + (300 * item.quantity), 0) ?? 500) / 1000
+      });
+
+      if (res.success && res.data && res.data[0]) {
+        const doc = res.data[0];
+        const { error } = await supabase.from('orders').update({
+          np_tracking_number: doc.IntDocNumber,
+          np_document_ref: doc.Ref,
+          order_status: 'Підтверджено'
+        }).eq('id', order.id);
+
+        if (error) throw error;
+        setSuccessMessage(`ТТН #${doc.IntDocNumber} успішно створено!`);
+        setAdminError(null);
+        fetchOrders();
+      } else {
+        const errMsg = res.errors?.join(', ') || "Помилка API Нової Пошти";
+        setAdminError({ orderId: order.id, message: errMsg });
+      }
+    } catch (err: any) {
+      setAdminError({ orderId: order.id, message: err.message });
+    } finally {
+      setProcessingOrderId(null);
+      setLoading(false);
+    }
+    setTimeout(() => setSuccessMessage(''), 5000);
+  }
+
+  const handleCopyTTN = (ttn: string) => {
+    navigator.clipboard.writeText(ttn);
+    setCopiedTtn(ttn);
+    setTimeout(() => setCopiedTtn(null), 2000);
+  };
+
+  async function updatePaymentStatus(orderId: string, status: string) {
     const { error } = await supabase.from('orders').update({ payment_status: status }).eq('id', orderId);
     if (error) alert(error.message);
     else fetchOrders();
   }
 
-  async function handleSubmitProduct(e) {
+  async function handleSubmitProduct(e: React.FormEvent) {
     e.preventDefault();
     setUploading(true);
     setErrorMessage('');
     setSuccessMessage('');
 
-    let uploadedUrls = [...existingImages]; // Keep old images
+    let uploadedUrls = [...existingImages];
 
     if (imageFiles && imageFiles.length > 0) {
       for (let i = 0; i < imageFiles.length; i++) {
@@ -119,9 +195,9 @@ export default function AdminDashboard() {
           .upload(filePath, file);
 
         if (uploadError) {
-          setErrorMessage(`Помилка Storage (фото ${file.name}): ` + uploadError.message + `. Можливо не налаштовані RLS політики доступу або бакет не існує?`);
+          setErrorMessage(`Помилка Storage (фото ${file.name}): ` + uploadError.message);
           setUploading(false);
-          return; // Stop upload process and don't save to DB
+          return;
         } else {
           const { data: { publicUrl } } = supabase.storage
             .from('candle-images')
@@ -137,17 +213,20 @@ export default function AdminDashboard() {
       ...formData,
       image_url,
       images: uploadedUrls,
-      price: parseFloat(formData.price)
+      price: typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price,
+      stock_quantity: typeof formData.stock_quantity === 'string' ? parseInt(formData.stock_quantity) : formData.stock_quantity,
+      weight_grams: typeof formData.weight_grams === 'string' ? parseFloat(formData.weight_grams) : formData.weight_grams,
+      length_cm: typeof formData.length_cm === 'string' ? parseFloat(formData.length_cm) : formData.length_cm,
+      width_cm: typeof formData.width_cm === 'string' ? parseFloat(formData.width_cm) : formData.width_cm,
+      height_cm: typeof formData.height_cm === 'string' ? parseFloat(formData.height_cm) : formData.height_cm,
     };
-
-    console.log("Відправка даних у Supabase:", productPayload);
 
     let error;
     if (editingProductId) {
       const { error: updateError } = await supabase.from('products').update(productPayload).eq('id', editingProductId);
       error = updateError;
     } else {
-    const { error: insertError } = await supabase.from('products').insert([productPayload]);
+      const { error: insertError } = await supabase.from('products').insert([productPayload]);
       error = insertError;
     }
 
@@ -157,59 +236,60 @@ export default function AdminDashboard() {
       setSuccessMessage(editingProductId ? 'Товар успішно оновлено!' : 'Товар успішно додано!');
       resetForm();
       fetchProducts();
-      
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     }
     setUploading(false);
   }
 
-  function openCreateOrderModal(request) {
+  function openCreateOrderModal(request: ContactRequest) {
     setCurrentRequest(request);
     setOrderCity('');
     setOrderWarehouse('');
+    setOrderNpCityRef('');
+    setOrderNpWarehouseRef('');
     setOrderItems([{ productId: '', qty: 1 }]);
     setIsOrderModalOpen(true);
   }
 
   async function handleProcessOrderFromRequest() {
+    if (!currentRequest) return;
     if (!orderCity || !orderWarehouse || orderItems.some(item => !item.productId || item.qty < 1)) {
-      alert("Заповніть всі поля та оберіть хоча б один товар");
+      alert("Заповніть всі поля: оберіть місто, відділення та оберіть хоча б один товар");
       return;
     }
 
     setOrderProcessLoading(true);
 
-    // Calculate total price
     let totalPrice = 0;
-    const finalOrderItems = [];
+    const finalOrderItems: any[] = [];
     
     orderItems.forEach(item => {
-      const product = products.find(p => p.id === item.productId);
+      const product = products.find(p => p.id.toString() === item.productId.toString());
       if (product) {
         totalPrice += product.price * item.qty;
         finalOrderItems.push({
           product_id: product.id,
-          quantity: parseInt(item.qty),
+          quantity: item.qty,
           price_at_purchase: product.price
         });
       }
     });
 
-    // 1. Create order
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await (supabase
       .from('orders')
       .insert([{
         customer_name: currentRequest.name,
         customer_phone: currentRequest.phone,
-        customer_email: currentRequest.contact_method === 'email' ? currentRequest.phone : '',
+        customer_email: currentRequest.email || '',
         shipping_city: orderCity,
         shipping_address: orderWarehouse,
+        np_city_ref: orderNpCityRef || null,
+        np_warehouse_ref: orderNpWarehouseRef || null,
         total_price: totalPrice,
         order_status: 'Нове'
       }])
       .select()
-      .single();
+      .single() as any);
 
     if (orderError) {
       alert("Помилка створення замовлення: " + orderError.message);
@@ -217,7 +297,6 @@ export default function AdminDashboard() {
       return;
     }
 
-    // 2. Insert order items
     const dbOrderItems = finalOrderItems.map(item => ({ ...item, order_id: order.id }));
     const { error: itemsError } = await supabase.from('order_items').insert(dbOrderItems);
     
@@ -227,7 +306,6 @@ export default function AdminDashboard() {
       return;
     }
 
-    // 3. Update request status and link order
     await supabase.from('contact_requests').update({ 
       status: 'Створено замовлення',
       order_id: order.id
@@ -237,7 +315,7 @@ export default function AdminDashboard() {
     setOrderProcessLoading(false);
     fetchRequests();
     fetchOrders();
-    setActiveTab('orders'); // Redirect to orders tab
+    setActiveTab('orders');
   }
 
   function resetForm() {
@@ -248,7 +326,7 @@ export default function AdminDashboard() {
     setEditingProductId(null);
   }
 
-  function handleEditClick(product) {
+  function handleEditClick(product: Product) {
     setFormData({
       name: product.name || '',
       description: product.description || '',
@@ -261,16 +339,16 @@ export default function AdminDashboard() {
       height_cm: product.height_cm || '',
       is_active: product.is_active !== undefined ? product.is_active : true
     });
-    setExistingImages(product.images || [product.image_url].filter(Boolean));
+    setExistingImages(product.images || [product.image_url].filter(Boolean) as string[]);
     setEditingProductId(product.id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function handleRemoveExistingImage(index) {
+  function handleRemoveExistingImage(index: number) {
     setExistingImages(existingImages.filter((_, i) => i !== index));
   }
 
-  async function handleDelete(id) {
+  async function handleDelete(id: string | number) {
     if (!confirm('Видалити цей товар?')) return;
     const { error } = await supabase.from('products').delete().eq('id', id);
     if (error) alert(error.message);
@@ -315,7 +393,6 @@ export default function AdminDashboard() {
       <main className="container section-padding">
         {activeTab === 'products' ? (
           <div className={styles.grid}>
-            {/* Products Form & List */}
             <section className={styles.formContainer}>
               <h2>{editingProductId ? 'Редагувати товар' : 'Додати новий товар'}</h2>
               <form onSubmit={handleSubmitProduct} className={styles.addForm}>
@@ -328,18 +405,18 @@ export default function AdminDashboard() {
                   required 
                 />
                 <div className={styles.row}>
-                  <input type="number" placeholder="Ціна (₴)" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
-                  <input type="number" placeholder="Кількість (шт)" value={formData.stock_quantity} onChange={e => setFormData({...formData, stock_quantity: e.target.value})} required />
+                  <input type="text" placeholder="Ціна (₴)" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
+                  <input type="text" placeholder="Кількість (шт)" value={formData.stock_quantity} onChange={e => setFormData({...formData, stock_quantity: e.target.value})} required />
                 </div>
                 <div className={styles.row}>
                   <input type="text" placeholder="Категорія" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required />
-                  <input type="number" placeholder="Вага (г)" value={formData.weight_grams} onChange={e => setFormData({...formData, weight_grams: e.target.value})} required />
+                  <input type="text" placeholder="Вага (г)" value={formData.weight_grams} onChange={e => setFormData({...formData, weight_grams: e.target.value})} required />
                 </div>
                 <p className={styles.label}>Габарити пакування (см):</p>
                 <div className={styles.row}>
-                  <input type="number" placeholder="Д" value={formData.length_cm} onChange={e => setFormData({...formData, length_cm: e.target.value})} required />
-                  <input type="number" placeholder="Ш" value={formData.width_cm} onChange={e => setFormData({...formData, width_cm: e.target.value})} required />
-                  <input type="number" placeholder="В" value={formData.height_cm} onChange={e => setFormData({...formData, height_cm: e.target.value})} required />
+                  <input type="text" placeholder="Д" value={formData.length_cm} onChange={e => setFormData({...formData, length_cm: e.target.value})} required />
+                  <input type="text" placeholder="Ш" value={formData.width_cm} onChange={e => setFormData({...formData, width_cm: e.target.value})} required />
+                  <input type="text" placeholder="В" value={formData.height_cm} onChange={e => setFormData({...formData, height_cm: e.target.value})} required />
                 </div>
                 <div className={styles.fileInput}>
                   <label>Додати фото (можна декілька):</label>
@@ -465,7 +542,7 @@ export default function AdminDashboard() {
                       </tr>
                     ))}
                     {requests.length === 0 && (
-                      <tr><td colSpan="7" style={{textAlign: 'center'}}>Немає запитів</td></tr>
+                      <tr><td colSpan={7} style={{textAlign: 'center'}}>Немає запитів</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -510,7 +587,60 @@ export default function AdminDashboard() {
                     <div className={styles.customerInfo}>
                       <p><strong>Клієнт:</strong> {order.customer_name}</p>
                       <p><strong>Телефон:</strong> {order.customer_phone}</p>
-                      <p><strong>Доставка:</strong> {order.shipping_city}, {order.shipping_address}</p>
+                      <p><strong>Доставка:</strong> {order.shipping_city}{order.shipping_city && order.shipping_address ? ', ' : ''}{order.shipping_address}</p>
+                      
+                      {adminError?.orderId === order.id && (
+                        <div className={styles.adminErrorInline}>
+                          ⚠️ {adminError.message}
+                        </div>
+                      )}
+
+                      {order.np_tracking_number && (
+                        <div className={styles.ttnContainer}>
+                          <div className={styles.ttnWrapper}>
+                            <div className={styles.ttnDisplay}>
+                              <span className={styles.ttnLabel}>ТТН</span>
+                              <span className={styles.ttnNumber}>{order.np_tracking_number}</span>
+                              <button 
+                                className={`${styles.copyBtn} ${copiedTtn === order.np_tracking_number ? styles.copied : ''}`}
+                                onClick={() => handleCopyTTN(order.np_tracking_number!)}
+                                title="Копіювати ТТН"
+                              >
+                                {copiedTtn === order.np_tracking_number ? (
+                                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                ) : (
+                                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                )}
+                              </button>
+                            </div>
+                            
+                            <div className={styles.printButtons}>
+                              <a href={`https://my.novaposhta.ua/orders/printMarking100x100/orders[]/${order.np_tracking_number}/type/pdf/apiKey/2f1930d910d4dee82c07c48763d3f7c6`} target="_blank" rel="noreferrer" className={styles.printButton}>
+                                <span>🖨️</span> Маркування
+                              </a>
+                              <a href={`https://my.novaposhta.ua/orders/printDocument/orders[]/${order.np_document_ref}/type/pdf/apiKey/2f1930d910d4dee82c07c48763d3f7c6`} target="_blank" rel="noreferrer" className={styles.printButton}>
+                                <span>📄</span> Накладна
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {order.order_status === 'Нове' && order.np_city_ref && !order.np_tracking_number && (
+                        <button 
+                          className={`btn ${styles.createTtnBtn} ${processingOrderId === order.id ? styles.loading : ''}`} 
+                          onClick={() => handleCreateWaybill(order)}
+                          disabled={loading || processingOrderId === order.id}
+                        >
+                          {processingOrderId === order.id ? (
+                            <>
+                              <span className={styles.spinner}></span>
+                              Створюємо...
+                            </>
+                          ) : (
+                            <>📦 Сформувати ТТН</>
+                          )}
+                        </button>
+                      )}
                     </div>
                     <div className={styles.orderItems}>
                       <h4>Товари:</h4>
@@ -549,12 +679,17 @@ export default function AdminDashboard() {
             </div>
             
             <div className={styles.formGroup}>
-              <label>Місто доставки:</label>
-              <input type="text" value={orderCity} onChange={e => setOrderCity(e.target.value)} placeholder="Київ" className={styles.modalInput} />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Відділення/Поштомат:</label>
-              <input type="text" value={orderWarehouse} onChange={e => setOrderWarehouse(e.target.value)} placeholder="Відділення №1" className={styles.modalInput} />
+              <label>Доставка (Нова Пошта):</label>
+              <NovaPoshtaSelects 
+                onCityChange={(city) => {
+                  setOrderCity(city?.Description || '');
+                  setOrderNpCityRef(city?.Ref || '');
+                }}
+                onWarehouseChange={(warehouse) => {
+                  setOrderWarehouse(warehouse?.Description || '');
+                  setOrderNpWarehouseRef(warehouse?.Ref || '');
+                }}
+              />
             </div>
 
             <div style={{ marginTop: '20px', marginBottom: '10px' }}>
@@ -583,7 +718,7 @@ export default function AdminDashboard() {
                   value={item.qty} 
                   onChange={e => {
                     const newItems = [...orderItems];
-                    newItems[index].qty = e.target.value;
+                    newItems[index].qty = parseInt(e.target.value);
                     setOrderItems(newItems);
                   }} 
                   className={styles.modalInput}

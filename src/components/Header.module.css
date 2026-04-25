@@ -20,11 +20,14 @@
 }
 
 .logoImg {
-  height: 36px;
-  width: 200px;
-  object-fit: cover;
-  object-position: center center;
+  height: 64px;
+  width: auto;
   display: block;
+  transition: transform 0.3s ease;
+}
+
+.logoImg:hover {
+  transform: scale(1.05);
 }
 
 .nav {
@@ -110,8 +113,8 @@
     letter-spacing: 0.5px;
   }
 
-  .logoLink svg {
-    width: 140px;
+  .logoImg {
+    height: 50px;
   }
 }
 
@@ -124,8 +127,8 @@
     font-size: 0.7rem;
   }
 
-  .logoLink svg {
-    width: 110px; /* Агресивне зменшення для вузьких екранів */
+  .logoImg {
+    height: 42px;
   }
 
   .cartBtn {

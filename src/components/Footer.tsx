@@ -1,6 +1,13 @@
+import React from 'react';
 import styles from './Footer.module.css';
 
-const socials = [
+interface SocialLink {
+  name: string;
+  href: string;
+  icon: React.ReactNode;
+}
+
+const socials: SocialLink[] = [
   {
     name: 'Instagram',
     href: '#',
@@ -46,7 +53,7 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={`container ${styles.footerContainer}`}>
         <div className={styles.brand}>
-          <div className={styles.logo}>Cozy Corner.</div>
+          <div className={styles.logo}>Flama Mia.</div>
           <p className={styles.text}>Світло, що об'єднує.</p>
         </div>
 
@@ -64,7 +71,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <p className={styles.copy}>© {new Date().getFullYear()} Cozy Corner. Всі права захищено.</p>
+        <p className={styles.copy}>© {new Date().getFullYear()} Flama Mia. Всі права захищено.</p>
       </div>
     </footer>
   );

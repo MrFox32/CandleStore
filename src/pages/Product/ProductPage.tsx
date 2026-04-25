@@ -5,11 +5,12 @@ import { useCart } from '../../context/CartContext';
 import ProductImageCarousel from '../../components/ProductImageCarousel';
 import CandleRating from '../../components/CandleRating';
 import styles from './ProductPage.module.css';
+import { Product } from '../../types';
 
 export default function ProductPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { addItem } = useCart();
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export default function ProductPage() {
       if (error) {
         console.error('Error fetching product:', error);
       } else if (data) {
-        setProduct(data);
+        setProduct(data as Product);
       }
       setLoading(false);
     }
@@ -50,7 +51,7 @@ export default function ProductPage() {
     );
   }
 
-  const images = product.images || [product.image_url || product.image];
+  const images = product.images || [product.image_url || product.image].filter(Boolean) as string[];
 
   return (
     <main className={styles.productPage}>
@@ -96,7 +97,7 @@ export default function ProductPage() {
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Наявність:</span>
                 <span className={styles.detailValue}>
-                  {product.stock_quantity > 0 ? (
+                  {product.stock_quantity && product.stock_quantity > 0 ? (
                     <span className={styles.inStock}>В наявності ({product.stock_quantity} шт)</span>
                   ) : (
                     <span className={styles.outOfStock}>Немає в наявності</span>
@@ -108,9 +109,9 @@ export default function ProductPage() {
             <button 
               className={styles.addToCartBtn}
               onClick={() => addItem(product)}
-              disabled={product.stock_quantity <= 0}
+              disabled={!product.stock_quantity || product.stock_quantity <= 0}
             >
-              {product.stock_quantity > 0 ? '+ ДОДАТИ В КОШИК' : 'НЕМАЄ В НАЯВНОСТІ'}
+              {product.stock_quantity && product.stock_quantity > 0 ? '+ ДОДАТИ В КОШИК' : 'НЕМАЄ В НАЯВНОСТІ'}
             </button>
           </div>
         </div>
@@ -130,7 +131,7 @@ export default function ProductPage() {
             {[
               { id: 1, author: 'Марина', rating: 5, comment: 'Неймовірний аромат! Свічка горить дуже довго, а запах лаванди розслабляє після робочого дня. Упаковка — це окремий вид мистецтва.', date: '3 дні тому' },
               { id: 2, author: 'Олег', rating: 4.5, comment: 'Дуже гарний набір. Брав на подарунок дівчині, вона в захваті. Зірочку зняв за невелику затримку в доставці, але якість свічок це компенсує.', date: '1 тиждень тому' },
-              { id: 3, author: 'Юлія', rating: 5, comment: 'Це вже моя третя покупка в Cozy Corner. Натуральний віск — це те, що я шукала. Ніякого хімічного запаху, тільки чиста насолода.', date: '2 тижні тому' }
+              { id: 3, author: 'Юлія', rating: 5, comment: 'Це вже моя третя покупка в Flama Mia. Натуральний віск — це те, що я шукала. Ніякого хімічного запаху, тільки чиста насолода.', date: '2 тижні тому' }
             ].map(review => (
               <div key={review.id} className={styles.reviewItem}>
                 <div className={styles.reviewMeta}>

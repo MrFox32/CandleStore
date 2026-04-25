@@ -122,3 +122,105 @@
     gap: 40px;
   }
 }
+
+.summaryShippingNotice {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dotted var(--border-color);
+  display: grid;
+  grid-template-areas: 
+    "label value"
+    "extra extra";
+  gap: 4px;
+  animation: fadeIn 0.4s ease;
+}
+
+.shippingLabel {
+  grid-area: label;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.shippingValue {
+  grid-area: value;
+  text-align: right;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.shippingExtra {
+  grid-area: extra;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nameGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.fullWidth {
+  grid-column: span 2;
+}
+
+.shippingSelector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  background: #F4F0EE;
+  padding: 6px;
+  border-radius: var(--radius-md);
+}
+
+.shippingTab {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.shippingTabActive {
+  background-color: var(--surface-color);
+  color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(142, 112, 96, 0.1);
+}
+
+.ukrposhtaFields {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  animation: fadeIn 0.4s ease;
+}
+
+.indexField {
+  width: 140px;
+}
+
+@media (max-width: 600px) {
+  .nameGrid {
+    grid-template-columns: 1fr;
+  }
+  .fullWidth {
+    grid-column: auto;
+  }
+}

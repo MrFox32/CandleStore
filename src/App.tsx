@@ -15,6 +15,7 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import CheckoutPage from './pages/Checkout/CheckoutPage';
 import SuccessPage from './pages/Checkout/SuccessPage';
 import ProductPage from './pages/Product/ProductPage';
+import { Session } from '@supabase/supabase-js';
 
 function MainSite() {
   return (
@@ -34,7 +35,7 @@ function MainSite() {
 }
 
 function App() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {

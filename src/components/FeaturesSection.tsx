@@ -1,7 +1,13 @@
 import React from 'react';
 import styles from './FeaturesSection.module.css';
 
-const features = [
+interface Feature {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}
+
+const features: Feature[] = [
   {
     title: '100% Соєвий віск',
     description: 'Натурально, екологічно та безпечно. Наші свічки не виділяють шкідливих речовин при горіннi.',
@@ -48,7 +54,7 @@ export default function FeaturesSection() {
     <section className={styles.featuresSection}>
       <div className="container">
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Чому обирають Cozy Corner?</h2>
+          <h2 className={styles.sectionTitle}>Чому обирають Flama Mia?</h2>
         </div>
         <div className={styles.grid}>
           {features.map((feature, index) => (
